@@ -1,5 +1,4 @@
 #ifndef TYPES_H
-
 #define TYPES_H
 
 #define AS_BIN_OP_PTR(r) ((EXPR_BIN_OP *)(r))
@@ -206,6 +205,5 @@ typedef struct _assignment_statement
     EXPR_OP * identifier_value;
     
 } ASSIGNMENT_STATEMENT;
-
 
 #endif
