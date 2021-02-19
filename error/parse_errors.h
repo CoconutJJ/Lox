@@ -4,9 +4,8 @@
 
 void parse_error(char *msg, int line);
 
-void register_error(ERROR_T type, char *msg, int line);
+void register_error(ERROR_T type, char *msg, TOKEN **current);
 
 void panic(TOKEN **current);
-
 
 #endif

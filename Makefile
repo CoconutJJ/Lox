@@ -1,27 +1,33 @@
-all: parse_errors.o parse_expression.o expression_utils.o statement.o token.o utils.o
+FLAGS=-g -Wall
+
+all: parse_errors.o parse_expression.o expression_utils.o statement.o token.o utils.o main.c
+	gcc $(FLAGS) parse_errors.o parse_expression.o expression_utils.o statement.o token.o utils.o main.c -o interp
+
+obj: parse_errors.o parse_expression.o expression_utils.o statement.o token.o utils.o
+	ld -r *.o -o interp.o
 
 parse_errors.o: error/parse_errors.c
-	gcc -c error/parse_errors.c -o parse_errors.o
+	gcc $(FLAGS) -c error/parse_errors.c -o parse_errors.o
 
 evaluate_expr.o: evaluate/evaluate_expr.c
-	gcc -c evaluate/evaluate_expr.c -o evaluate_expr.o
+	gcc $(FLAGS) -c evaluate/evaluate_expr.c -o evaluate_expr.o
 
 parse_expression.o: parser/expression.c
-	gcc -c parser/expression.c -o parse_expression.o
+	gcc $(FLAGS) -c parser/expression.c -o parse_expression.o
 
 expression_utils.o: parser/expression_utils.c
-	gcc -c parser/expression_utils.c -o expression_utils.o
+	gcc $(FLAGS) -c parser/expression_utils.c -o expression_utils.o
 
 statement.o: parser/statement.c
-	gcc -c parser/statement.c -o statement.o
+	gcc $(FLAGS) -c parser/statement.c -o statement.o
 
-token.o: token/tokenizer.c
-	gcc -c token/tokenizer.c -o tokenizer.o
+token.o: token/token.c
+	gcc $(FLAGS) -c token/token.c -o token.o
 
 utils.o: utils/utils.c
-	gcc -c utils/utils.c -o utils.o
+	gcc $(FLAGS) -c utils/utils.c -o utils.o
 
 .PHONY: clean
 
 clean: 
-	rm tokenizer.o parse_expression.o evaluate_expr.o parse_errors.o
+	rm *.o
