@@ -64,6 +64,7 @@ typedef struct _token {
          * Type of token
          */
         TOKEN_T t;
+
         /**
          * Next Token
          */
@@ -162,7 +163,12 @@ typedef struct _expr_unr_op {
 } EXPR_UNR_OP;
 
 typedef struct statement_t {
-        enum { E_IFELSE_STATEMENT, E_WHILE_STATEMENT, E_FOR_STATEMENT, E_ASSIGNMENT_STATEMENT } type;
+        enum {
+                E_IFELSE_STATEMENT,
+                E_WHILE_STATEMENT,
+                E_FOR_STATEMENT,
+                E_ASSIGNMENT_STATEMENT
+        } type;
         struct statement_t *next;
 } STATEMENT;
 
@@ -185,11 +191,31 @@ typedef struct _for_statement {
 } FOR_STATEMENT;
 
 typedef struct _assignment_statement {
-
         struct statement_t _statement_;
-        char *   identifier_name;
-        EXPR_OP *identifier_value;
+        char *             identifier_name;
+        EXPR_OP *          identifier_value;
 
 } ASSIGNMENT_STATEMENT;
+
+typedef struct hashcontainer {
+        char *key;
+        void *item;
+        int   deleted;
+
+} HashContainer;
+
+typedef struct hashtable {
+        HashContainer *table;
+        int            size;
+        int            filled;
+
+} HashTable;
+
+typedef struct _environment {
+        HashTable *          table;
+        struct _environment *next;
+        struct _environment *prev;
+
+} ENVIRONMENT;
 
 #endif

@@ -64,14 +64,13 @@ STATEMENT *parse_stmt(TOKEN **current) {
 }
 
 STATEMENT *parse_statements(TOKEN **current) {
-
-        STATEMENT * code = parse_stmt(current);
+        STATEMENT *code = parse_stmt(current);
 
         if (!is_at_end(current)) {
                 register_error(SYNTAX_ERROR, "unknown symbol", current);
                 return NULL;
         }
-        
+
         return code;
 }
 
@@ -80,9 +79,9 @@ ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
 
         if (!match_token(current, EQUAL)) return NULL;
 
-        EXPR_OP * assign_value = parse_expr(current);
+        EXPR_OP *assign_value = parse_expr(current);
 
-        ASSIGNMENT_STATEMENT * new_assignment = create_assignment_stmt();
+        ASSIGNMENT_STATEMENT *new_assignment = create_assignment_stmt();
 
         return NULL;
 }
@@ -117,8 +116,8 @@ WHILE_STATEMENT *parse_while(TOKEN **current) {
 
         STATEMENT *body = parse_stmt(current);
 
-        new_while->body             = body;
-        new_while->cond_expr        = cond;
+        new_while->body      = body;
+        new_while->cond_expr = cond;
 
         if (!match_token(current, RIGHT_BRACE)) {
                 register_error(SYNTAX_ERROR, "missing } after WHILE statement",
@@ -195,9 +194,9 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
 
         IFELSE_STATEMENT *new_ifelse = create_ifelse_stmt();
 
-        new_ifelse->cond_expr       = cond;
-        new_ifelse->if_clause       = if_body;
-        new_ifelse->else_clause     = else_body;
+        new_ifelse->cond_expr   = cond;
+        new_ifelse->if_clause   = if_body;
+        new_ifelse->else_clause = else_body;
 
         return new_ifelse;
 }
