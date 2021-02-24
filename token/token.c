@@ -231,6 +231,7 @@ TOKEN *tokenize(char *code) {
                 case '!':
                         add_token(match(code, &c, '=') ? BANG_EQUAL : BANG,
                                   NULL, line);
+                        break;
                 case '(':
                         add_token(LEFT_PAREN, NULL, line);
                         break;

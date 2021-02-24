@@ -67,7 +67,6 @@ int match_op(TOKEN **current, EXPR_V op) {
                 *current = (*current)->next;
                 return 1;
         }
-
         return 0;
 }
 
@@ -150,7 +149,7 @@ EXPR_OP *parse_primary(TOKEN **current) {
 
         register_error(SYNTAX_ERROR, "Unknown expression", current);
         panic(current);
-        
+
         return NULL;
 }
 
@@ -211,4 +210,6 @@ EXPR_OP *parse_equality(TOKEN **current) {
                                                   parse_comparison, ops, 2);
 }
 
-EXPR_OP *parse_expr(TOKEN **current) { return parse_equality(current); }
+EXPR_OP *parse_expr(TOKEN **current) { 
+        return parse_equality(current); 
+}

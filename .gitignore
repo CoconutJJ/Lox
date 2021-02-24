@@ -1,2 +1,6 @@
 *.o
-
+.vscode/
+interp
+# Temp files I sometimes create for testing purposes.
+code.txt
+code.diff

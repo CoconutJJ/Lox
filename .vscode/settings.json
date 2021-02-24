@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "functional": "c",
-        "expression.h": "c",
-        "utils.h": "c",
-        "types.h": "c"
-    }
-}

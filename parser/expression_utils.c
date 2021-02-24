@@ -80,3 +80,30 @@ EXPR_BOOL *create_expr_bool(int b) {
 
         return new_bool;
 }
+
+void free_expr(EXPR_OP *head) {
+        if (!head) return;
+
+        switch (head->expr_t) {
+        case EXPR_T_BINARY:
+                free_expr(AS_BIN_OP_PTR(head)->left);
+                free_expr(AS_BIN_OP_PTR(head)->right);
+                free(head);
+                break;
+        case EXPR_T_UNARY:
+                free_expr(AS_UNR_OP_PTR(head)->body);
+                free(head);
+                break;
+        case EXPR_T_BOOL:
+                free(head);
+                break;
+        case EXPR_T_NUMBER:
+                free(head);
+                break;
+        case EXPR_T_STRING:
+                free(((EXPR_STR *)head)->data);
+                free(head);
+        default:
+                break;
+        }
+}

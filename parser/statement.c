@@ -4,12 +4,13 @@
 #include "../types.h"
 #include "assert.h"
 #include "expression.h"
+#include "statement_utils.h"
 
 WHILE_STATEMENT *     parse_while(TOKEN **current);
 IFELSE_STATEMENT *    parse_conditional(TOKEN **current);
 ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current);
 
-int is_at_end(TOKEN **current) { return (*current) == NULL; }
+inline int is_at_end(TOKEN **current) { return (*current) == NULL; }
 
 int match_token(TOKEN **current, TOKEN_T t) {
         if (is_at_end(current)) {
@@ -70,7 +71,7 @@ STATEMENT *parse_statements(TOKEN **current) {
                 register_error(SYNTAX_ERROR, "unknown symbol", current);
                 return NULL;
         }
-
+        
         return code;
 }
 
@@ -79,13 +80,15 @@ ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
 
         if (!match_token(current, EQUAL)) return NULL;
 
-        
+        EXPR_OP * assign_value = parse_expr(current);
+
+        ASSIGNMENT_STATEMENT * new_assignment = create_assignment_stmt();
 
         return NULL;
 }
 
 WHILE_STATEMENT *parse_while(TOKEN **current) {
-        WHILE_STATEMENT *new_while = malloc(sizeof(WHILE_STATEMENT));
+        WHILE_STATEMENT *new_while = create_while_stmt();
 
         assert(match_token(current, WHILE));
 
@@ -114,7 +117,6 @@ WHILE_STATEMENT *parse_while(TOKEN **current) {
 
         STATEMENT *body = parse_stmt(current);
 
-        new_while->_statement_.type = E_WHILE_STATEMENT;
         new_while->body             = body;
         new_while->cond_expr        = cond;
 
@@ -191,9 +193,8 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                 }
         }
 
-        IFELSE_STATEMENT *new_ifelse = malloc(sizeof(IFELSE_STATEMENT));
+        IFELSE_STATEMENT *new_ifelse = create_ifelse_stmt();
 
-        new_ifelse->_statment_.type = E_IFELSE_STATEMENT;
         new_ifelse->cond_expr       = cond;
         new_ifelse->if_clause       = if_body;
         new_ifelse->else_clause     = else_body;
