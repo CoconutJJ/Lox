@@ -5,7 +5,6 @@
 #include "../types.h"
 int isTruthy(EXPR_OP *val) {}
 
-
 EXPR_OP *evaluate_expr(EXPR_OP *tree) {
         if (!tree) return NULL;
 
@@ -57,7 +56,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree) {
                 break;
         case EXPR_T_UNARY:;  // <-- very important semicolon. do not remove.
                 EXPR_UNR_OP *unrop = (EXPR_UNR_OP *)tree;
- 
+
                 switch (unrop->op) {
                 case EXPR_V_NOT:
                         /* code */

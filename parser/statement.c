@@ -38,6 +38,7 @@ STATEMENT *parse_stmt(TOKEN **current) {
 
         while (!is_at_end(current)) {
                 switch ((*current)->t) {
+         
                 case IF:
                         *curr = (STATEMENT *)parse_conditional(current);
                         break;
@@ -53,7 +54,7 @@ STATEMENT *parse_stmt(TOKEN **current) {
                         break;
                 }
 
-                if ((*curr)) {
+                if (*curr) {
                         curr = &((*curr)->next);
                 } else {
                         break;
@@ -75,6 +76,8 @@ STATEMENT *parse_statements(TOKEN **current) {
 }
 
 ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
+        TOKEN *ident = *current;
+
         if (!match_token(current, IDENTIFIER)) return NULL;
 
         if (!match_token(current, EQUAL)) return NULL;
@@ -83,7 +86,10 @@ ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
 
         ASSIGNMENT_STATEMENT *new_assignment = create_assignment_stmt();
 
-        return NULL;
+        new_assignment->identifier_name  = ident->value;
+        new_assignment->identifier_value = assign_value;
+
+        return new_assignment;
 }
 
 WHILE_STATEMENT *parse_while(TOKEN **current) {

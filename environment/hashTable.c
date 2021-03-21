@@ -5,7 +5,17 @@
 
 #include "../types.h"
 
-int hash(char *key) {}
+unsigned long hash(char *key) {
+        /**
+         * djb2 hash method
+         */
+        unsigned long hash = 5381;
+        int           c;
+
+        while (c = *key++) hash = ((hash << 5) + hash) ^ c;
+
+        return hash;
+}
 
 void initialize_containers(HashTable *t) {
         for (int i = 0; i < t->size; i++) {
@@ -27,18 +37,15 @@ HashTable *hashtable_new() {
         return new;
 }
 
-void hashtable_destroy(HashTable * table) {
-
-    for (int i = 0; i < table->size; i++) {
-
-        if (table->table[i].key == NULL) continue;
-
-        free(table->table[i].item);
-        free(table->table[i].key);
-    }
-
-    free(table);
-
+void hashtable_destroy(HashTable *table) {
+        for (int i = 0; i < table->size; i++) {
+                if (table->table[i].key != NULL) {
+                        free(table->table[i].item);
+                        free(table->table[i].key);
+                }
+        }
+        free(table->table);
+        free(table);
 }
 
 void hashtable_find_and_set(HashTable *t, char *key, void *item) {
@@ -48,8 +55,18 @@ void hashtable_find_and_set(HashTable *t, char *key, void *item) {
 
         HashContainer *node;
 
-        while ((node = &(t->table[index]))->key != NULL)
+        while ((node = &(t->table[index]))->key != NULL) {
+                /* 
+                 * If key already exists, destroy old key and item
+                 */
+                if (strcmp(node->key, key) == 0) {
+                        free(node->key);
+                        free(node->item);
+                        break;
+                }
+
                 index = (index + 1) % t->size;
+        }
 
         node->key     = key;
         node->item    = item;
@@ -81,6 +98,30 @@ void expand_hashtable(HashTable *t) {
         free(old_container);
 }
 
+void shrink_hashtable(HashTable *t) {
+        if (t->size == 1) return;
+
+        HashContainer *new_container =
+            malloc(t->size / 2 * sizeof(HashContainer));
+
+        HashContainer *old_container = t->table;
+
+        t->table  = new_container;
+        t->size   = t->size / 2;
+        t->filled = 0;
+
+        initialize_containers(t);
+
+        for (int i = 0; i < t->size * 2; i++) {
+                if (old_container[i].deleted || old_container[i].key == NULL)
+                        continue;
+
+                hashtable_find_and_set(t, old_container[i].key,
+                                       old_container[i].item);
+        }
+        free(old_container);
+}
+
 void hashtable_delete(HashTable *t, char *key) {
         HashContainer *node;
         int            index = hash(key) % t->size, currIndex = index;
@@ -99,6 +140,8 @@ void hashtable_delete(HashTable *t, char *key) {
         node->deleted = 1;
 
         t->filled--;
+
+        if (t->filled <= t->size / 4) shrink_hashtable(t);
 }
 
 void *hashtable_get(HashTable *t, char *key) {
@@ -120,9 +163,7 @@ void *hashtable_get(HashTable *t, char *key) {
 
                 currIndex = (currIndex + 1) % t->size;
 
-                if (currIndex == index) {
-                        return NULL;
-                }
+                if (currIndex == index) return NULL;
         }
 }
 
@@ -131,10 +172,15 @@ void hashtable_set(HashTable *t, char *key, void *item, int item_sz) {
 
         if (t->filled == t->size) expand_hashtable(t);
 
-        char *memkey = malloc(strlen(key) + 1);
-        strcpy(memkey, key);
+        char *memkey  = malloc(strlen(key) + 1);
         void *memitem = malloc(item_sz);
+
+        strcpy(memkey, key);
         memcpy(memitem, item, item_sz);
 
         hashtable_find_and_set(t, memkey, memitem);
+}
+
+int hashtable_has(HashTable *t, char *key) {
+        return hashtable_get(t, key) != NULL;
 }
