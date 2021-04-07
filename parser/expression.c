@@ -49,6 +49,8 @@ EXPR_V _to_op(TOKEN *token) {
                 return EXPR_V_TRUE;
         case FALSE:
                 return EXPR_V_FALSE;
+        case IDENTIFIER:
+                return EXPR_V_VAR;
         default:
                 return -1;
         }
@@ -130,7 +132,7 @@ EXPR_OP *parse_primary(TOKEN **current) {
         }
 
         if (match_op(current, EXPR_V_NUMBER)) {
-                EXPR_OP *num = (EXPR_OP *)create_expr_num(old->value);
+                EXPR_OP *num = (EXPR_OP *)create_expr_num(strtod(old->value, NULL));
 
                 return num;
         }
@@ -145,6 +147,12 @@ EXPR_OP *parse_primary(TOKEN **current) {
                 EXPR_OP *bl = (EXPR_OP *)create_expr_bool(0);
 
                 return bl;
+        }
+
+        if (match_op(current, EXPR_V_VAR)) {
+                EXPR_OP * var = (EXPR_OP*) create_expr_var(old->value);
+
+                return var;
         }
 
         register_error(SYNTAX_ERROR, "Unknown expression", current);

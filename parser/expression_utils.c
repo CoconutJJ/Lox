@@ -45,14 +45,14 @@ EXPR_STR *create_expr_str(char *str) {
         }
 
         new_str->_expr_op.expr_t = EXPR_T_STRING;
-        new_str->data            = malloc(sizeof(EXPR_STR));
         int sz                   = strlen(str);
+        new_str->data = malloc(sz + 1);
         nstrcp(new_str->data, str, sz);
 
         return new_str;
 }
 
-EXPR_NUM *create_expr_num(char *num) {
+EXPR_NUM *create_expr_num(double num) {
         EXPR_NUM *new_num = malloc(sizeof(EXPR_NUM));
 
         if (!new_num) {
@@ -61,7 +61,7 @@ EXPR_NUM *create_expr_num(char *num) {
         }
 
         new_num->_expr_op.expr_t = EXPR_T_NUMBER;
-        new_num->data            = strtod(num, NULL);
+        new_num->data            = num;
 
         return new_num;
 }
@@ -79,6 +79,23 @@ EXPR_BOOL *create_expr_bool(int b) {
         new_bool->data = b;
 
         return new_bool;
+}
+
+EXPR_VAR *create_expr_var(char *name) {
+        EXPR_VAR *new_var = malloc(sizeof(EXPR_VAR));
+
+        if (!new_var) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
+        new_var->_expr_op.expr_t = EXPR_T_VAR;
+        int sz                   = strlen(name);
+
+        new_var->var = malloc(sz + 1);
+
+        nstrcp(new_var->var, name, sz);
+
+        return new_var;
 }
 
 void free_expr(EXPR_OP *head) {

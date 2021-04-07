@@ -20,11 +20,11 @@ void destroy_environment_scope(ENVIRONMENT* env) {
 
 void destroy_environment(ENVIRONMENT* env) {
         while (env) {
+
                 ENVIRONMENT* prev = env->prev;
-
                 destroy_environment_scope(env);
-
                 env = prev;
+        
         }
 }
 

@@ -26,8 +26,7 @@ void initialize_containers(HashTable *t) {
 }
 
 HashTable *hashtable_new() {
-        HashTable *new = malloc(sizeof(HashTable));
-
+        HashTable *new   = malloc(sizeof(HashTable));
         new->table       = malloc(sizeof(HashContainer));
         new->table->key  = NULL;
         new->table->item = NULL;
@@ -56,7 +55,7 @@ void hashtable_find_and_set(HashTable *t, char *key, void *item) {
         HashContainer *node;
 
         while ((node = &(t->table[index]))->key != NULL) {
-                /* 
+                /*
                  * If key already exists, destroy old key and item
                  */
                 if (strcmp(node->key, key) == 0) {
@@ -76,6 +75,7 @@ void hashtable_find_and_set(HashTable *t, char *key, void *item) {
 }
 
 void expand_hashtable(HashTable *t) {
+        
         HashContainer *new_container =
             malloc(2 * t->size * sizeof(HashContainer));
 

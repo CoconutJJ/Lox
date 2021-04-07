@@ -100,7 +100,8 @@ typedef enum _op_v {
         EXPR_V_NUMBER,
         EXPR_V_STRING,
         EXPR_V_TRUE,
-        EXPR_V_FALSE
+        EXPR_V_FALSE,
+        EXPR_V_VAR
 } EXPR_V;
 
 /**
@@ -116,7 +117,8 @@ typedef enum _op_t {
         EXPR_T_UNARY,
         EXPR_T_STRING,
         EXPR_T_NUMBER,
-        EXPR_T_BOOL
+        EXPR_T_BOOL,
+        EXPR_T_VAR
 
 } EXPR_T;
 
@@ -154,6 +156,11 @@ typedef struct _expr_bool {
         EXPR_OP _expr_op;
         int     data;
 } EXPR_BOOL;
+typedef struct _expr_var {
+        EXPR_OP _expr_op;
+        char *  var;
+        /* data */
+} EXPR_VAR;
 
 typedef struct _expr_unr_op {
         EXPR_OP  _expr_op;
@@ -167,7 +174,8 @@ typedef struct statement_t {
                 E_IFELSE_STATEMENT,
                 E_WHILE_STATEMENT,
                 E_FOR_STATEMENT,
-                E_ASSIGNMENT_STATEMENT
+                E_ASSIGNMENT_STATEMENT,
+                E_DECLARATION_STATEMENT
         } type;
         struct statement_t *next;
 } STATEMENT;
@@ -196,6 +204,13 @@ typedef struct _assignment_statement {
         EXPR_OP *          identifier_value;
 
 } ASSIGNMENT_STATEMENT;
+
+typedef struct _declaration_statement {
+        struct statement_t _statement_;
+        char *             identifier_name;
+        EXPR_OP *          identifier_value;
+
+} DECLARATION_STATEMENT;
 
 typedef struct hashcontainer {
         char *key;
