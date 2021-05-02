@@ -75,7 +75,6 @@ void hashtable_find_and_set(HashTable *t, char *key, void *item) {
 }
 
 void expand_hashtable(HashTable *t) {
-        
         HashContainer *new_container =
             malloc(2 * t->size * sizeof(HashContainer));
 
@@ -150,6 +149,7 @@ void *hashtable_get(HashTable *t, char *key) {
         while (1) {
                 if (!t->table[currIndex].key) {
                         currIndex = (currIndex + 1) % t->size;
+                        if (currIndex == index) return NULL;
                         continue;
                 }
 
@@ -168,7 +168,6 @@ void *hashtable_get(HashTable *t, char *key) {
 }
 
 void hashtable_set(HashTable *t, char *key, void *item, int item_sz) {
-
         if (t->filled == t->size) expand_hashtable(t);
 
         char *memkey  = malloc(strlen(key) + 1);
