@@ -12,7 +12,7 @@ unsigned long hash(char *key) {
         unsigned long hash = 5381;
         int           c;
 
-        while (c = *key++) hash = ((hash << 5) + hash) ^ c;
+        while ((c = *key++)) hash = ((hash << 5) + hash) ^ c;
 
         return hash;
 }
@@ -168,7 +168,6 @@ void *hashtable_get(HashTable *t, char *key) {
 }
 
 void hashtable_set(HashTable *t, char *key, void *item, int item_sz) {
-        int index = hash(key) % t->size;
 
         if (t->filled == t->size) expand_hashtable(t);
 

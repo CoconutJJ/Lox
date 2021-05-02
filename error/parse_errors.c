@@ -43,10 +43,9 @@ void register_error(ERROR_T type, char *msg, TOKEN **current) {
                 }
 
                 break;
-        case RUNTIME_ERROR:
-                fprintf(stderr, "runtime error: line %d: %s\n",
-                        (*current)->line, msg);
-                break;
+        default:
+                fprintf(stderr, "register_error: type not implemented");
+                exit(EXIT_FAILURE);
         }
 }
 

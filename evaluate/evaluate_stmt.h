@@ -1,11 +1,11 @@
-#ifndef EVALUATE_H
-#define EVALUATE_H
+#ifndef EVALUATE_STMT_H
+#define EVALUATE_STMT_H
 
-#include "../types.h";
+#include "../types.h"
 
 
 int is_truthy(EXPR_OP *val);
 
-EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env);
+void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env);
 
 #endif

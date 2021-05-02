@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "../types.h"
-#include "hashTable.h"
+#include "hash_table.h"
 
 ENVIRONMENT* create_environment() {
         ENVIRONMENT* new_env = malloc(sizeof(ENVIRONMENT));
@@ -53,7 +53,7 @@ void set_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
 
 int update_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
         while (current) {
-                if (hashtable_has(current, name)) {
+                if (hashtable_has(current->table, name)) {
                         set_value(current, name, value, value_sz);
                         return 1;
                 }

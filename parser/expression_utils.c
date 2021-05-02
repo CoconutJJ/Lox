@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,6 +101,7 @@ void free_expr(EXPR_OP *head) {
         if (!head) return;
 
         switch (head->expr_t) {
+                
         case EXPR_T_BINARY:
                 free_expr(AS_BIN_OP_PTR(head)->left);
                 free_expr(AS_BIN_OP_PTR(head)->right);

@@ -1,6 +1,8 @@
-#include "./evaluate_stmt.h"
 #include "../environment/environment.h"
 #include "../types.h"
+#include "./evaluate_expr.h"
+
+void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env);
 
 void evaluate_ifelse_statement(IFELSE_STATEMENT* stmt, ENVIRONMENT* env) {
         if (is_truthy(evaluate_expr(stmt->cond_expr, env))) {
@@ -22,7 +24,6 @@ void evaluate_ifelse_statement(IFELSE_STATEMENT* stmt, ENVIRONMENT* env) {
 }
 
 void evaluate_while_statement(WHILE_STATEMENT* stmt, ENVIRONMENT* env) {
-        
         while (is_truthy(evaluate_expr(stmt->cond_expr, env))) {
                 env = down_scope(env);
 
@@ -48,6 +49,8 @@ void evaluate_assignment_statement(ASSIGNMENT_STATEMENT* stmt,
         case EXPR_V_TRUE:
                 data_size = sizeof(EXPR_BOOL);
                 break;
+        default:
+                break;
         }
 
         update_value(env, stmt->identifier_name, res, data_size);
@@ -69,28 +72,31 @@ void evaluate_declaration_statement(DECLARATION_STATEMENT* stmt,
         case EXPR_V_TRUE:
                 data_size = sizeof(EXPR_BOOL);
                 break;
+        default:
+                break;
         }
 
         set_value(env, stmt->identifier_name, res, data_size);
 }
 
-void evaluate_for_statement(FOR_STATEMENT* stmt, ENVIRONMENT* env) {}
+// void evaluate_for_statement(FOR_STATEMENT* stmt, ENVIRONMENT* env) {}
 
 void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env) {
-
         while (stmt) {
                 switch (stmt->type) {
                 case E_IFELSE_STATEMENT:
-                        evaluate_ifelse_statement(stmt, env);
+                        evaluate_ifelse_statement((IFELSE_STATEMENT*)stmt, env);
                         break;
                 case E_WHILE_STATEMENT:
-                        evaluate_while_statement(stmt, env);
+                        evaluate_while_statement((WHILE_STATEMENT*)stmt, env);
                         break;
                 case E_ASSIGNMENT_STATEMENT:
-                        evaluate_assignment_statement(stmt, env);
+                        evaluate_assignment_statement(
+                            (ASSIGNMENT_STATEMENT*)stmt, env);
                         break;
                 case E_DECLARATION_STATEMENT:
-                        evaluate_declaration_statement(stmt, env);
+                        evaluate_declaration_statement(
+                            (DECLARATION_STATEMENT*)stmt, env);
                         break;
                 default:
                         break;
@@ -98,5 +104,4 @@ void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env) {
 
                 stmt = stmt->next;
         }
-
 }

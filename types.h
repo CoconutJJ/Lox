@@ -195,8 +195,8 @@ typedef struct _while_statement {
 
 } WHILE_STATEMENT;
 
-typedef struct _for_statement {
-} FOR_STATEMENT;
+// typedef struct _for_statement {
+// } FOR_STATEMENT;
 
 typedef struct _assignment_statement {
         struct statement_t _statement_;
