@@ -22,6 +22,40 @@ $ ./interp <filename>
 
 to run a source file.
 
+Here is sample script you can try out:
+
+```
+// Here is a comment
+
+var a = 3 
+var b = 2
+
+if (a > b) {
+
+    if (2 * a >= b) {
+        print("A")
+    }
+
+    a = a * b
+    
+    print(a)
+
+} else {
+
+    print("C")
+
+}
+
+while (a * b < 2000) {
+
+    print("D")
+
+    a = a + 1
+    b = b + 1
+}
+```
+
+
 ## Credits
 
 Thank you so much to Bob Nystrom and his excellent Crafting Interpreters guide 
