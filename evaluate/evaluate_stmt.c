@@ -1,5 +1,7 @@
-#include "../error/errors.h"
+#include <stdio.h>
+
 #include "../environment/environment.h"
+#include "../error/errors.h"
 #include "../types.h"
 #include "./evaluate_expr.h"
 
@@ -54,7 +56,9 @@ void evaluate_assignment_statement(ASSIGNMENT_STATEMENT* stmt,
         }
 
         if (!update_value(env, stmt->identifier_name, res, data_size)) {
-                register_error(RUNTIME_ERROR, "assignment to undeclared variable", stmt->_statement_.line);
+                register_error(RUNTIME_ERROR,
+                               "assignment to undeclared variable",
+                               stmt->_statement_.line);
         }
 }
 
@@ -80,6 +84,33 @@ void evaluate_declaration_statement(DECLARATION_STATEMENT* stmt,
         set_value(env, stmt->identifier_name, res, data_size);
 }
 
+void evaluate_print_statement(PRINT_STATEMENT* stmt, ENVIRONMENT* env) {
+        EXPR_OP* res = evaluate_expr(stmt->value, env);
+
+        switch (res->expr_t) {
+        case EXPR_T_NUMBER:;
+                EXPR_NUM* num = (EXPR_NUM*)res;
+                printf("%lf\n", num->data);
+                break;
+        case EXPR_T_STRING:;
+                EXPR_STR* str = (EXPR_STR*)res;
+                printf("%s\n", str->data);
+                break;
+        case EXPR_T_BOOL:;
+                EXPR_BOOL* bl = (EXPR_BOOL*)res;
+
+                if (bl->data) {
+                        printf("TRUE\n");
+                } else {
+                        printf("FALSE\n");
+                }
+                break;
+
+        default:
+                break;
+        }
+}
+
 // void evaluate_for_statement(FOR_STATEMENT* stmt, ENVIRONMENT* env) {}
 
 void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env) {
@@ -98,6 +129,9 @@ void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env) {
                 case E_DECLARATION_STATEMENT:
                         evaluate_declaration_statement(
                             (DECLARATION_STATEMENT*)stmt, env);
+                        break;
+                case E_PRINT_STATEMENT:
+                        evaluate_print_statement((PRINT_STATEMENT *)stmt, env);
                         break;
                 default:
                         break;

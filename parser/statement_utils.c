@@ -50,3 +50,14 @@ DECLARATION_STATEMENT* create_declaration_stmt() {
 
         return new_declaration;
 }
+
+PRINT_STATEMENT * create_print_stmt() {
+
+        PRINT_STATEMENT * new_print = malloc(sizeof(PRINT_STATEMENT));
+
+        new_print->_statement_.next = NULL;
+        new_print->_statement_.type = E_PRINT_STATEMENT;
+        new_print->value = NULL;
+
+        return new_print;
+}

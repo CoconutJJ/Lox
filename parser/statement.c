@@ -6,10 +6,11 @@
 #include "expression.h"
 #include "statement_utils.h"
 
-WHILE_STATEMENT *     parse_while(TOKEN **current);
-IFELSE_STATEMENT *    parse_conditional(TOKEN **current);
-ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current);
+WHILE_STATEMENT *      parse_while(TOKEN **current);
+IFELSE_STATEMENT *     parse_conditional(TOKEN **current);
+ASSIGNMENT_STATEMENT * parse_assignment(TOKEN **current);
 DECLARATION_STATEMENT *parse_declaration(TOKEN **current);
+PRINT_STATEMENT *parse_print(TOKEN **current);
 
 inline int is_at_end(TOKEN **current) { return (*current) == NULL; }
 
@@ -53,6 +54,9 @@ STATEMENT *parse_stmt(TOKEN **current) {
                 case VAR:
                         *curr = (STATEMENT *)parse_declaration(current);
                         break;
+                case PRINT:
+                        *curr = (STATEMENT *)parse_print(current);
+                        break;
                 default:
                         break;
                 }
@@ -77,6 +81,22 @@ STATEMENT *parse_statements(TOKEN **current) {
         }
 
         return code;
+}
+
+PRINT_STATEMENT *parse_print(TOKEN **current) {
+        if (!match_token(current, PRINT)) return NULL;
+
+        if (!match_token(current, LEFT_PAREN)) return NULL;
+
+        EXPR_OP *print_value = parse_expr(current);
+
+        if (!match_token(current, RIGHT_PAREN)) return NULL;
+
+        PRINT_STATEMENT *new_print = create_print_stmt();
+
+        new_print->value = print_value;
+
+        return new_print;
 }
 
 ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
@@ -200,7 +220,6 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                         register_error(SYNTAX_ERROR,
                                        "missing { after ELSE statement",
                                        (*current)->line);
-
 
                         return NULL;
                 }

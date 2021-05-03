@@ -22,40 +22,41 @@ typedef struct _error_entry {
 typedef struct _token TOKEN;
 
 typedef enum _token_t_ {
-        FUNC,
-        RETURN,
-        NIL,
-        IF,
+        AND,
+        BANG,
+        BANG_EQUAL,
+        COMMA,
         ELSE,
         ELSEIF,
-        WHILE,
-        FOR,
-        VAR,
         EQUAL,
-        GREATER,
-        LESS,
-        GREATER_EQ,
-        LESS_EQ,
         EQUAL_EQUAL,
-        BANG_EQUAL,
-        BANG,
-        AND,
-        OR,
-        TRUE,
         FALSE,
-        PLUS,
+        FOR,
+        FUNC,
+        GREATER,
+        GREATER_EQ,
+        IDENTIFIER,
+        IF,
+        LEFT_BRACE,
+        LEFT_PAREN,
+        LESS,
+        LESS_EQ,
         MINUS,
         MULTIPLY,
-        SLASH,
-        SEMICOLON,
-        COMMA,
-        LEFT_PAREN,
-        RIGHT_PAREN,
-        LEFT_BRACE,
-        RIGHT_BRACE,
-        IDENTIFIER,
+        NIL,
         NUMBER,
+        OR,
+        PLUS,
+        PRINT, 
+        RETURN,
+        RIGHT_BRACE,
+        RIGHT_PAREN,
+        SEMICOLON,
+        SLASH,
         STRING,
+        TRUE,
+        VAR,
+        WHILE,
 
 } TOKEN_T;
 
@@ -175,9 +176,10 @@ typedef struct statement_t {
                 E_WHILE_STATEMENT,
                 E_FOR_STATEMENT,
                 E_ASSIGNMENT_STATEMENT,
-                E_DECLARATION_STATEMENT
+                E_DECLARATION_STATEMENT,
+                E_PRINT_STATEMENT
         } type;
-        int line;
+        int                 line;
         struct statement_t *next;
 } STATEMENT;
 
@@ -212,6 +214,12 @@ typedef struct _declaration_statement {
         EXPR_OP *          identifier_value;
 
 } DECLARATION_STATEMENT;
+
+typedef struct _print_statement {
+        struct statement_t _statement_;
+        EXPR_OP *          value;
+
+} PRINT_STATEMENT;
 
 typedef struct hashcontainer {
         char *key;

@@ -72,6 +72,10 @@ TOKEN_T matchIdentifier(char *ident) {
                 return IF;
         }
 
+        if (strcmp(ident, "print") == 0) {
+                return PRINT;
+        }
+
         if (strcmp(ident, "else") == 0) {
                 return ELSE;
         }
@@ -130,13 +134,13 @@ void identifier(char *code, int *c, int line) {
 }
 
 void string(char *code, int *c, int line) {
-        char *start = code + 1;
+        char *start = &(code[*c]) + 1;
 
         while (peek(code, c) != '"') {
                 if (token_at_end(code, c))
                         parse_error("expected end-quote from string", line);
 
-                c++;
+                (*c)++;
         }
         char *end = &code[*c];
 
@@ -146,7 +150,7 @@ void string(char *code, int *c, int line) {
 
         add_token(STRING, str, line);
 
-        c++;
+        (*c)++;
 }
 
 void number(char *code, int *c, int line) {
