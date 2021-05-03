@@ -1,3 +1,4 @@
+#include "../error/errors.h"
 #include "../environment/environment.h"
 #include "../types.h"
 #include "./evaluate_expr.h"
@@ -39,21 +40,22 @@ void evaluate_assignment_statement(ASSIGNMENT_STATEMENT* stmt,
         int      data_size;
 
         switch (res->expr_t) {
-        case EXPR_V_NUMBER:
+        case EXPR_T_NUMBER:
                 data_size = sizeof(EXPR_NUM);
                 break;
-        case EXPR_V_STRING:
+        case EXPR_T_STRING:
                 data_size = sizeof(EXPR_STR);
                 break;
-        case EXPR_V_FALSE:
-        case EXPR_V_TRUE:
+        case EXPR_T_BOOL:
                 data_size = sizeof(EXPR_BOOL);
                 break;
         default:
                 break;
         }
 
-        update_value(env, stmt->identifier_name, res, data_size);
+        if (!update_value(env, stmt->identifier_name, res, data_size)) {
+                register_error(RUNTIME_ERROR, "assignment to undeclared variable", stmt->_statement_.line);
+        }
 }
 
 void evaluate_declaration_statement(DECLARATION_STATEMENT* stmt,
@@ -62,14 +64,13 @@ void evaluate_declaration_statement(DECLARATION_STATEMENT* stmt,
         int      data_size;
 
         switch (res->expr_t) {
-        case EXPR_V_NUMBER:
+        case EXPR_T_NUMBER:
                 data_size = sizeof(EXPR_NUM);
                 break;
-        case EXPR_V_STRING:
+        case EXPR_T_STRING:
                 data_size = sizeof(EXPR_STR);
                 break;
-        case EXPR_V_FALSE:
-        case EXPR_V_TRUE:
+        case EXPR_T_BOOL:
                 data_size = sizeof(EXPR_BOOL);
                 break;
         default:

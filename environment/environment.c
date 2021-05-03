@@ -38,6 +38,9 @@ ENVIRONMENT* down_scope(ENVIRONMENT* current) {
 ENVIRONMENT* up_scope(ENVIRONMENT* current) {
         ENVIRONMENT* prev = current->prev;
 
+        /**
+         * Prevent root environment from being destroyed.
+         */
         if (!prev) return current;
 
         prev->next = NULL;

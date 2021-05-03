@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../error/parse_errors.h"
+#include "../error/errors.h"
 #include "../types.h"
 #include "../utils/utils.h"
 #include "expression_utils.h"
@@ -155,8 +155,7 @@ EXPR_OP *parse_primary(TOKEN **current) {
                 return var;
         }
 
-        register_error(SYNTAX_ERROR, "Unknown expression", current);
-        panic(current);
+        register_error(SYNTAX_ERROR, "Unknown expression", (*current)->line);
 
         return NULL;
 }

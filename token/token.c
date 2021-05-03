@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../error/parse_errors.h"
+#include "../error/errors.h"
 #include "../types.h"
 #include "../utils/utils.h"
 

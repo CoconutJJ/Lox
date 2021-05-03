@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "../error/parse_errors.h"
+#include "../error/errors.h"
 #include "../types.h"
 #include "assert.h"
 #include "expression.h"
@@ -9,6 +9,7 @@
 WHILE_STATEMENT *     parse_while(TOKEN **current);
 IFELSE_STATEMENT *    parse_conditional(TOKEN **current);
 ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current);
+DECLARATION_STATEMENT *parse_declaration(TOKEN **current);
 
 inline int is_at_end(TOKEN **current) { return (*current) == NULL; }
 
@@ -38,7 +39,6 @@ STATEMENT *parse_stmt(TOKEN **current) {
 
         while (!is_at_end(current)) {
                 switch ((*current)->t) {
-         
                 case IF:
                         *curr = (STATEMENT *)parse_conditional(current);
                         break;
@@ -49,6 +49,9 @@ STATEMENT *parse_stmt(TOKEN **current) {
                         if (peek_token(current) == EQUAL) {
                                 *curr = (STATEMENT *)parse_assignment(current);
                         }
+                        break;
+                case VAR:
+                        *curr = (STATEMENT *)parse_declaration(current);
                         break;
                 default:
                         break;
@@ -68,7 +71,8 @@ STATEMENT *parse_statements(TOKEN **current) {
         STATEMENT *code = parse_stmt(current);
 
         if (!is_at_end(current)) {
-                register_error(SYNTAX_ERROR, "unknown symbol", current);
+                register_error(SYNTAX_ERROR, "unknown symbol",
+                               (*current)->line);
                 return NULL;
         }
 
@@ -88,19 +92,39 @@ ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
 
         new_assignment->identifier_name  = ident->value;
         new_assignment->identifier_value = assign_value;
-
+        new_assignment->_statement_.line = ident->line;
         return new_assignment;
+}
+
+DECLARATION_STATEMENT *parse_declaration(TOKEN **current) {
+        if (!match_token(current, VAR)) return NULL;
+
+        TOKEN *ident = *current;
+
+        if (!match_token(current, IDENTIFIER)) return NULL;
+
+        if (!match_token(current, EQUAL)) return NULL;
+
+        EXPR_OP *assign_value = parse_expr(current);
+
+        DECLARATION_STATEMENT *new_declaration = create_declaration_stmt();
+
+        new_declaration->identifier_name  = ident->value;
+        new_declaration->identifier_value = assign_value;
+        new_declaration->_statement_.line = ident->line;
+        return new_declaration;
 }
 
 WHILE_STATEMENT *parse_while(TOKEN **current) {
         WHILE_STATEMENT *new_while = create_while_stmt();
 
+        new_while->_statement_.line = (*current)->line;
+
         assert(match_token(current, WHILE));
 
         if (!match_token(current, LEFT_PAREN)) {
                 register_error(SYNTAX_ERROR, "missing ( after WHILE statement",
-                               current);
-                panic(current);
+                               (*current)->line);
                 return NULL;
         }
 
@@ -108,15 +132,13 @@ WHILE_STATEMENT *parse_while(TOKEN **current) {
 
         if (!match_token(current, RIGHT_PAREN)) {
                 register_error(SYNTAX_ERROR, "missing ) after WHILE statement",
-                               current);
-                panic(current);
+                               (*current)->line);
                 return NULL;
         }
 
         if (!match_token(current, LEFT_BRACE)) {
                 register_error(SYNTAX_ERROR, "missing { after WHILE statement",
-                               current);
-                panic(current);
+                               (*current)->line);
                 return NULL;
         }
 
@@ -127,8 +149,7 @@ WHILE_STATEMENT *parse_while(TOKEN **current) {
 
         if (!match_token(current, RIGHT_BRACE)) {
                 register_error(SYNTAX_ERROR, "missing } after WHILE statement",
-                               current);
-                panic(current);
+                               (*current)->line);
                 return NULL;
         }
 
@@ -138,12 +159,15 @@ WHILE_STATEMENT *parse_while(TOKEN **current) {
 // FOR_STATEMENT *parse_for(TOKEN **current) {}
 
 IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
+        IFELSE_STATEMENT *new_ifelse = create_ifelse_stmt();
+
+        new_ifelse->_statment_.line = (*current)->line;
+
         assert(match_token(current, IF));
 
         if (!match_token(current, LEFT_PAREN)) {
                 register_error(SYNTAX_ERROR, "missing ( after IF statement",
-                               current);
-                panic(current);
+                               (*current)->line);
                 return NULL;
         }
 
@@ -151,15 +175,13 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
 
         if (!match_token(current, RIGHT_PAREN)) {
                 register_error(SYNTAX_ERROR, "missing ) after IF statement",
-                               current);
-                panic(current);
+                               (*current)->line);
                 return NULL;
         }
 
         if (!match_token(current, LEFT_BRACE)) {
                 register_error(SYNTAX_ERROR, "missing { after IF clause",
-                               current);
-                panic(current);
+                               (*current)->line);
                 return NULL;
         }
 
@@ -167,8 +189,7 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
 
         if (!match_token(current, RIGHT_BRACE)) {
                 register_error(SYNTAX_ERROR, "missing } after IF clause",
-                               current);
-                panic(current);
+                               (*current)->line);
                 return NULL;
         }
 
@@ -178,9 +199,8 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                 if (!match_token(current, LEFT_BRACE)) {
                         register_error(SYNTAX_ERROR,
                                        "missing { after ELSE statement",
-                                       current);
+                                       (*current)->line);
 
-                        panic(current);
 
                         return NULL;
                 }
@@ -190,15 +210,11 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                 if (!match_token(current, RIGHT_BRACE)) {
                         register_error(SYNTAX_ERROR,
                                        "missing } after ELSE statement",
-                                       current);
-
-                        panic(current);
+                                       (*current)->line);
 
                         return NULL;
                 }
         }
-
-        IFELSE_STATEMENT *new_ifelse = create_ifelse_stmt();
 
         new_ifelse->cond_expr   = cond;
         new_ifelse->if_clause   = if_body;

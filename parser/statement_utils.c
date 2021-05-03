@@ -38,3 +38,15 @@ ASSIGNMENT_STATEMENT* create_assignment_stmt() {
 
         return new_assignment;
 }
+
+DECLARATION_STATEMENT* create_declaration_stmt() {
+        DECLARATION_STATEMENT* new_declaration =
+            malloc(sizeof(DECLARATION_STATEMENT));
+
+        new_declaration->_statement_.next = NULL;
+        new_declaration->_statement_.type = E_DECLARATION_STATEMENT;
+        new_declaration->identifier_name  = NULL;
+        new_declaration->identifier_value = NULL;
+
+        return new_declaration;
+}

@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "../environment/environment.h"
-#include "../error/parse_errors.h"
+#include "../error/errors.h"
 #include "../parser/expression.h"
 #include "../parser/expression_utils.h"
 #include "../types.h"

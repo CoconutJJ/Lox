@@ -1,10 +1,10 @@
 FLAGS=-g -Wall -Wextra -pedantic -O
 
-all: parse_errors.o hash_table.o environment.o expression.o evaluate_expr.o expression_utils.o statement.o evaluate_stmt.o statement_utils.o token.o utils.o main.c
-	gcc $(FLAGS) parse_errors.o hash_table.o environment.o expression.o evaluate_expr.o expression_utils.o statement.o evaluate_stmt.o statement_utils.o token.o utils.o main.c -o interp
+all: errors.o hash_table.o environment.o expression.o evaluate_expr.o expression_utils.o statement.o evaluate_stmt.o statement_utils.o token.o utils.o main.c
+	gcc $(FLAGS) errors.o hash_table.o environment.o expression.o evaluate_expr.o expression_utils.o statement.o evaluate_stmt.o statement_utils.o token.o utils.o main.c -o interp
 
-parse_errors.o: error/parse_errors.c
-	gcc $(FLAGS) -c error/parse_errors.c -o parse_errors.o
+errors.o: error/errors.c
+	gcc $(FLAGS) -c error/errors.c -o errors.o
 
 environment.o: environment/environment.c
 	gcc $(FLAGS) -c environment/environment.c -o environment.o

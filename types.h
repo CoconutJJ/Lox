@@ -55,7 +55,7 @@ typedef enum _token_t_ {
         RIGHT_BRACE,
         IDENTIFIER,
         NUMBER,
-        STRING
+        STRING,
 
 } TOKEN_T;
 
@@ -177,6 +177,7 @@ typedef struct statement_t {
                 E_ASSIGNMENT_STATEMENT,
                 E_DECLARATION_STATEMENT
         } type;
+        int line;
         struct statement_t *next;
 } STATEMENT;
 

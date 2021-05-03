@@ -1,5 +1,3 @@
-#include "parse_errors.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,22 +27,16 @@ panic_end:
         return;
 }
 
-void register_error(ERROR_T type, char *msg, TOKEN **current) {
+void register_error(ERROR_T type, char *msg, int line) {
         if (is_panic()) return;
 
         switch (type) {
         case SYNTAX_ERROR:
-                if (!(*current)) {
-                        fprintf(stderr, "syntax error: %s\n", msg);
-                        fprintf(stderr, "Unexpected end of input\n");
-                } else {
-                        fprintf(stderr, "syntax error: line %d: %s\n",
-                                (*current)->line, msg);
-                }
-
+                fprintf(stderr, "syntax error: line %d: %s\n", line, msg);
+                exit(EXIT_FAILURE);
                 break;
-        default:
-                fprintf(stderr, "register_error: type not implemented");
+        case RUNTIME_ERROR:
+                fprintf(stderr, "runtime error: line %d: %s\n", line, msg);
                 exit(EXIT_FAILURE);
         }
 }
