@@ -1,4 +1,4 @@
-# Lox Language Adaptation
+# Lox-like Toy Language 
 
 ## About
 
