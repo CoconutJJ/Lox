@@ -18,6 +18,10 @@
 
 #include "../types.h"
 
+/**
+ * Linear probing hashtable.
+ */
+
 unsigned long hash(char *key) {
         /**
          * djb2 hash method
@@ -38,6 +42,9 @@ void initialize_containers(HashTable *t) {
         }
 }
 
+/**
+ * Create a new hashtable
+ */
 HashTable *hashtable_new() {
         HashTable *new   = malloc(sizeof(HashTable));
         new->table       = malloc(sizeof(HashContainer));
@@ -48,7 +55,9 @@ HashTable *hashtable_new() {
 
         return new;
 }
-
+/**
+ * Destroy the hash table
+ */
 void hashtable_destroy(HashTable *table) {
         for (int i = 0; i < table->size; i++) {
                 if (table->table[i].key != NULL) {
@@ -60,6 +69,9 @@ void hashtable_destroy(HashTable *table) {
         free(table);
 }
 
+/**
+ * Sets an entry in the hashtable
+ */
 void hashtable_find_and_set(HashTable *t, char *key, void *item) {
         assert(t->filled != t->size);
 
@@ -87,9 +99,17 @@ void hashtable_find_and_set(HashTable *t, char *key, void *item) {
         t->filled++;
 }
 
+/**
+ * Expand hashtable by a factor of 2
+ */
 void expand_hashtable(HashTable *t) {
+        /**
+         * Here we detach the original containers list and create a fresh one
+         * of 2 times the size
+         */
         HashContainer *new_container =
             malloc(2 * t->size * sizeof(HashContainer));
+
 
         HashContainer *old_container = t->table;
 
@@ -99,6 +119,9 @@ void expand_hashtable(HashTable *t) {
 
         initialize_containers(t);
 
+        /**
+         * We must rehash and insert into new container list.
+         */
         for (int i = 0; i < t->size / 2; i++) {
                 if (old_container[i].deleted || old_container[i].key == NULL)
                         continue;
@@ -106,10 +129,15 @@ void expand_hashtable(HashTable *t) {
                 hashtable_find_and_set(t, old_container[i].key,
                                        old_container[i].item);
         }
-
+        /**
+         * Destroy the old one.
+         */
         free(old_container);
 }
 
+/**
+ * Shrink the hashtable by a factor of 2. If size is unit, then nothing is done.
+ */
 void shrink_hashtable(HashTable *t) {
         if (t->size == 1) return;
 
@@ -133,11 +161,16 @@ void shrink_hashtable(HashTable *t) {
         }
         free(old_container);
 }
-
+/**
+ * Delete the entry from the hashtable
+ */
 void hashtable_delete(HashTable *t, char *key) {
         HashContainer *node;
         int            index = hash(key) % t->size, currIndex = index;
 
+        /**
+         * Find the entry that contains the key-value pair.
+         */
         while (strcmp((node = &(t->table[currIndex]))->key, key) != 0) {
                 currIndex = (currIndex + 1) % t->size;
 
@@ -153,20 +186,35 @@ void hashtable_delete(HashTable *t, char *key) {
 
         t->filled--;
 
+        /**
+         * Only shrink if used space has dropped to less than one quarter of
+         * allocated space
+         */
         if (t->filled <= t->size / 4) shrink_hashtable(t);
 }
 
+/**
+ * Return a pointer to the entry with provided key.
+ */
 void *hashtable_get(HashTable *t, char *key) {
         int index = hash(key) % t->size, currIndex = index;
 
         while (1) {
-                if (!t->table[currIndex].key) {
+                
+                /**
+                 * If entry was deleted then just skip
+                 */
+
+                if (t->table[currIndex].deleted) {
                         currIndex = (currIndex + 1) % t->size;
                         if (currIndex == index) return NULL;
                         continue;
                 }
 
-                if (t->table[currIndex].deleted) {
+                /**
+                 * Cell was never used, key must not be in table.
+                 */
+                if (t->table[currIndex].key == NULL) {
                         return NULL;
                 }
 
@@ -176,13 +224,28 @@ void *hashtable_get(HashTable *t, char *key) {
 
                 currIndex = (currIndex + 1) % t->size;
 
+                /**
+                 * We have looped through everything, entry clearly does not
+                 * exist.
+                 */
                 if (currIndex == index) return NULL;
         }
 }
 
+/**
+ * Sets an entry in the table.
+ */
 void hashtable_set(HashTable *t, char *key, void *item, int item_sz) {
+        /**
+         * Need to ensure we have enough space for another entry, expand
+         * otherwise.
+         */
         if (t->filled == t->size) expand_hashtable(t);
 
+        /**
+         * Copy the key and item data, external pointers may go out of scope
+         * or be freed. 
+         */
         char *memkey  = malloc(strlen(key) + 1);
         void *memitem = malloc(item_sz);
 

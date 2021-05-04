@@ -17,6 +17,9 @@
 #include "../types.h"
 #include "hash_table.h"
 
+/**
+ * Creates a new environment ready for storage
+ */
 ENVIRONMENT* create_environment() {
         ENVIRONMENT* new_env = malloc(sizeof(ENVIRONMENT));
 
@@ -27,11 +30,17 @@ ENVIRONMENT* create_environment() {
         return new_env;
 }
 
+/**
+ * Destroys the current environment scope
+ */
 void destroy_environment_scope(ENVIRONMENT* env) {
         hashtable_destroy(env->table);
         free(env);
 }
 
+/**
+ * Destroy the environment from env and up (including root)
+ */
 void destroy_environment(ENVIRONMENT* env) {
         while (env) {
 
@@ -42,6 +51,9 @@ void destroy_environment(ENVIRONMENT* env) {
         }
 }
 
+/**
+ * Enter a scope block
+ */
 ENVIRONMENT* down_scope(ENVIRONMENT* current) {
         current->next       = create_environment();
         current->next->prev = current;
@@ -49,6 +61,10 @@ ENVIRONMENT* down_scope(ENVIRONMENT* current) {
         return current->next;
 }
 
+/**
+ * Leave the current scope block, silently ignores if current scope block is
+ * also root scope. Will never destroy root environment
+ */
 ENVIRONMENT* up_scope(ENVIRONMENT* current) {
         ENVIRONMENT* prev = current->prev;
 
@@ -64,10 +80,17 @@ ENVIRONMENT* up_scope(ENVIRONMENT* current) {
         return prev;
 }
 
+/**
+ * Set the name value keypair in the current environment.
+ */
 void set_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
         hashtable_set(current->table, name, value, value_sz);
 }
 
+/**
+ * Search current environment and higher scope environments for name value
+ * keypair and update with new values
+ */
 int update_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
         while (current) {
                 if (hashtable_has(current->table, name)) {
@@ -81,6 +104,11 @@ int update_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
         return 0;
 }
 
+/**
+ * Get the value associated with name from current environment or higher scoped
+ * environments. Returns the value in the lowest environment containing such
+ * name.
+ */
 void* get_value(ENVIRONMENT* current, char* name) {
         while (current) {
                 void* obj = hashtable_get(current->table, name);

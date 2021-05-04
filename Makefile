@@ -1,7 +1,9 @@
 FLAGS=-g -Wall -Wextra -pedantic -O
 
-all: errors.o hash_table.o environment.o expression.o evaluate_expr.o expression_utils.o statement.o evaluate_stmt.o statement_utils.o token.o utils.o main.c
-	gcc $(FLAGS) errors.o hash_table.o environment.o expression.o evaluate_expr.o expression_utils.o statement.o evaluate_stmt.o statement_utils.o token.o utils.o main.c -o interp
+OBJECTS=errors.o hash_table.o environment.o expression.o evaluate_expr.o expression_utils.o statement.o evaluate_stmt.o statement_utils.o token.o utils.o
+
+dev: $(OBJECTS)  main.c
+	gcc $(FLAGS) $(OBJECTS) main.c -o interp
 
 errors.o: error/errors.c
 	gcc $(FLAGS) -c error/errors.c -o errors.o

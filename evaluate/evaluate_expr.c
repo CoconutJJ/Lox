@@ -22,6 +22,10 @@
 #include "../parser/expression_utils.h"
 #include "../types.h"
 
+/**
+ * Evaluates a Number, String or Bool unit expression and decides whether the
+ * value is a truthy value or falsey value.
+ */
 int is_truthy(EXPR_OP *val) {
         switch (val->expr_t) {
         case EXPR_T_NUMBER:;
@@ -65,11 +69,17 @@ EXPR_OP *copy_leaf(EXPR_OP *op) {
                 EXPR_VAR *var = (EXPR_VAR *)op;
                 return (EXPR_OP *)create_expr_var(var->var);
                 break;
+        default:
+                fprintf(stderr, "bug: copy_leaf: recieved invalid enum");
+                exit(EXIT_FAILURE);
+                break;
         }
 }
 
 EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
+        
         if (!tree) return NULL;
+        
         EXPR_OP *result;
 
         switch (tree->expr_t) {
@@ -79,6 +89,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
 
                 EXPR_OP *left  = evaluate_expr(binop->left, env);
                 EXPR_OP *right = evaluate_expr(binop->right, env);
+                
                 switch (binop->op) {
                 case EXPR_V_PLUS:
 
@@ -200,8 +211,16 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                 default:
                         break;
                 }
+
+                /**
+                 * Left and right evaluations are have been copied from
+                 * copy_leaf(). Free them since we are backtracking up the tree
+                 */
+
                 free(left);
                 free(right);
+
+
                 return result;
                 break;
         case EXPR_T_UNARY:;  // <-- very important semicolon. do not remove.
@@ -229,7 +248,12 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                                 "bug: evaluate_expr: unmatched unary operator");
                         break;
                 }
+
+                /**
+                 * Free the body copied by copy_leaf()
+                 */
                 free(body);
+                
                 return result;
         case EXPR_T_VAR:;
 
