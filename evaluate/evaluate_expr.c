@@ -158,6 +158,8 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                                    right->expr_t == EXPR_T_BOOL) {
                                 return (EXPR_OP *) create_expr_bool(is_truthy(left) ==
                                                         is_truthy(right));
+                        } else {
+                                return (EXPR_OP *) create_expr_bool(0);
                         }
                         break;
                 case EXPR_V_MULTIPLY:

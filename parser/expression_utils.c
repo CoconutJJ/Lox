@@ -60,6 +60,12 @@ EXPR_STR *create_expr_str(char *str) {
         new_str->_expr_op.expr_t = EXPR_T_STRING;
         int sz                   = strlen(str);
         new_str->data = malloc(sz + 1);
+
+        if (!new_str->data) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
+
         nstrcp(new_str->data, str, sz);
 
         return new_str;
@@ -105,6 +111,11 @@ EXPR_VAR *create_expr_var(char *name) {
         int sz                   = strlen(name);
 
         new_var->var = malloc(sz + 1);
+
+        if (!new_var->var) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
 
         nstrcp(new_var->var, name, sz);
 

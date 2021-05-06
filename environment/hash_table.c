@@ -13,6 +13,7 @@
     this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -46,8 +47,20 @@ void initialize_containers(HashTable *t) {
  * Create a new hashtable
  */
 HashTable *hashtable_new() {
-        HashTable *new   = malloc(sizeof(HashTable));
-        new->table       = malloc(sizeof(HashContainer));
+        HashTable *new = malloc(sizeof(HashTable));
+
+        if (!new) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
+
+        new->table = malloc(sizeof(HashContainer));
+
+        if (!new->table) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
+
         new->table->key  = NULL;
         new->table->item = NULL;
         new->filled      = 0;
@@ -110,6 +123,10 @@ void expand_hashtable(HashTable *t) {
         HashContainer *new_container =
             malloc(2 * t->size * sizeof(HashContainer));
 
+        if (!new_container) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
 
         HashContainer *old_container = t->table;
 
@@ -143,6 +160,11 @@ void shrink_hashtable(HashTable *t) {
 
         HashContainer *new_container =
             malloc(t->size / 2 * sizeof(HashContainer));
+
+        if (!new_container) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
 
         HashContainer *old_container = t->table;
 
@@ -198,9 +220,7 @@ void hashtable_delete(HashTable *t, char *key) {
  */
 void *hashtable_get(HashTable *t, char *key) {
         int index = hash(key) % t->size, currIndex = index;
-
         while (1) {
-                
                 /**
                  * If entry was deleted then just skip
                  */
@@ -244,10 +264,21 @@ void hashtable_set(HashTable *t, char *key, void *item, int item_sz) {
 
         /**
          * Copy the key and item data, external pointers may go out of scope
-         * or be freed. 
+         * or be freed.
          */
         char *memkey  = malloc(strlen(key) + 1);
+
+        if (!memkey) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
+
         void *memitem = malloc(item_sz);
+
+        if (!memitem) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
 
         strcpy(memkey, key);
         memcpy(memitem, item, item_sz);

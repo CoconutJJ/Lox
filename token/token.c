@@ -55,6 +55,11 @@ void add_token(TOKEN_T t, char *value, int line) {
 
         TOKEN *new_token = malloc(sz);
 
+        if (!new_token) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
+
         new_token->t    = t;
         new_token->line = line;
         new_token->next = NULL;

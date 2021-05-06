@@ -38,6 +38,11 @@ int main(int argc, char **argv) {
 
         char *buf = malloc(source_sz * sizeof(char) + 1);
 
+        if (!buf) {
+                perror("malloc");
+                exit(EXIT_FAILURE);
+        }
+
         fread(buf, source_sz, 1, source);
 
         buf[source_sz] = '\0';

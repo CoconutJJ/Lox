@@ -13,6 +13,7 @@
     this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
+
 #include "../error/errors.h"
 #include "../types.h"
 #include "assert.h"
@@ -23,7 +24,7 @@ WHILE_STATEMENT *      parse_while(TOKEN **current);
 IFELSE_STATEMENT *     parse_conditional(TOKEN **current);
 ASSIGNMENT_STATEMENT * parse_assignment(TOKEN **current);
 DECLARATION_STATEMENT *parse_declaration(TOKEN **current);
-PRINT_STATEMENT *parse_print(TOKEN **current);
+PRINT_STATEMENT *      parse_print(TOKEN **current);
 
 inline int is_at_end(TOKEN **current) { return (*current) == NULL; }
 
@@ -39,6 +40,9 @@ int match_token(TOKEN **current, TOKEN_T t) {
         return 0;
 }
 
+/**
+ * Peek at the next token in the list.
+ */
 TOKEN_T peek_token(TOKEN **current) {
         if (is_at_end(current)) return -1;
 
@@ -52,6 +56,9 @@ STATEMENT *parse_stmt(TOKEN **current) {
         STATEMENT **curr = &head;
 
         while (!is_at_end(current)) {
+                /**
+                 * Match for the start of the statement
+                 */
                 switch ((*current)->t) {
                 case IF:
                         *curr = (STATEMENT *)parse_conditional(current);
@@ -74,16 +81,18 @@ STATEMENT *parse_stmt(TOKEN **current) {
                         break;
                 }
 
-                if (*curr) {
+                if (*curr)
                         curr = &((*curr)->next);
-                } else {
+                else
                         break;
-                }
         }
 
         return head;
 }
 
+/**
+ * Entry function to parse list of statements
+ */
 STATEMENT *parse_statements(TOKEN **current) {
         STATEMENT *code = parse_stmt(current);
 
@@ -95,7 +104,9 @@ STATEMENT *parse_statements(TOKEN **current) {
 
         return code;
 }
-
+/**
+ * Parse a print() statement
+ */
 PRINT_STATEMENT *parse_print(TOKEN **current) {
         if (!match_token(current, PRINT)) return NULL;
 
@@ -112,6 +123,9 @@ PRINT_STATEMENT *parse_print(TOKEN **current) {
         return new_print;
 }
 
+/**
+ * Parse an assignment statement
+ */
 ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
         TOKEN *ident = *current;
 
@@ -129,6 +143,9 @@ ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
         return new_assignment;
 }
 
+/**
+ * Parse a declaration statement
+ */
 DECLARATION_STATEMENT *parse_declaration(TOKEN **current) {
         if (!match_token(current, VAR)) return NULL;
 
@@ -148,6 +165,9 @@ DECLARATION_STATEMENT *parse_declaration(TOKEN **current) {
         return new_declaration;
 }
 
+/**
+ * Parse a while statement
+ */
 WHILE_STATEMENT *parse_while(TOKEN **current) {
         WHILE_STATEMENT *new_while = create_while_stmt();
 

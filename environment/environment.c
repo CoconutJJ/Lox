@@ -1,3 +1,4 @@
+
 /*
     This program is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
@@ -13,7 +14,7 @@
     this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-
+#include <stdio.h>
 #include "../types.h"
 #include "hash_table.h"
 
@@ -22,6 +23,10 @@
  */
 ENVIRONMENT* create_environment() {
         ENVIRONMENT* new_env = malloc(sizeof(ENVIRONMENT));
+
+        if (!new_env) {
+                perror("malloc");
+        }
 
         new_env->next  = NULL;
         new_env->prev  = NULL;
