@@ -77,17 +77,7 @@ void add_token(TOKEN_T t, char *value, int line) {
         return;
 }
 
-void destroyTokenList(TOKEN *head) {
-        while (head) {
-                TOKEN *next = head->next;
-                free(head);
-                head = next;
-        }
-        start = NULL;
-        end   = NULL;
-}
-
-TOKEN_T matchIdentifier(char *ident) {
+TOKEN_T match_identifier(char *ident) {
         if (strcmp(ident, "if") == 0) {
                 return IF;
         }
@@ -148,7 +138,7 @@ void identifier(char *code, int *c, int line) {
 
         nstrcp(ident, start, end - start + 1);
 
-        TOKEN_T id = matchIdentifier(ident);
+        TOKEN_T id = match_identifier(ident);
 
         add_token(id != -1 ? id : IDENTIFIER, id != -1 ? NULL : ident, line);
 }
@@ -291,6 +281,21 @@ void number(char *code, int *c, int line) {
         add_token(NUMBER, num, line);
 }
 
+void destroy_token_list(TOKEN * list) {
+
+        while (list) {
+
+                TOKEN * next = list->next;
+
+                free(list);
+
+                list = next;
+
+        }
+
+}
+
+
 TOKEN *tokenize(char *code) {
         int c    = 0;
         int line = 1;
@@ -392,5 +397,11 @@ TOKEN *tokenize(char *code) {
                 }
                 c++;
         }
-        return start;
+
+        TOKEN * head = start;
+
+        start = NULL;
+        end = NULL;
+
+        return head;
 }

@@ -22,7 +22,6 @@
 #include "types.h"
 
 int main(int argc, char **argv) {
-
         if (argc == 1) {
                 fprintf(stderr, "error: no input files\n");
                 exit(EXIT_FAILURE);
@@ -51,7 +50,12 @@ int main(int argc, char **argv) {
 
         TOKEN *head = tokenize(buf);
 
-        STATEMENT *  code     = parse_statements(&head);
+        TOKEN *curr = head;
+
+        STATEMENT *code = parse_statements(&curr);
+
+        destroy_token_list(head);
+
         ENVIRONMENT *root_env = create_environment();
 
         evaluate_statements(code, root_env);

@@ -4,6 +4,6 @@
 #include "../types.h"
 
 TOKEN *tokenize(char *code);
-void destroyTokenList(TOKEN *head);
+void destroy_token_list(TOKEN * list);
 
 #endif
