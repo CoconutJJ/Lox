@@ -153,6 +153,86 @@ void identifier(char *code, int *c, int line) {
         add_token(id != -1 ? id : IDENTIFIER, id != -1 ? NULL : ident, line);
 }
 
+void unescape_string(char *str, char *buf, int line) {
+        char *start = str;
+
+        /**
+         * Employ a cursor that will always point to the next byte we can write
+         * to in buf.
+         */
+        char *cursor = buf;
+
+        char *esc;
+
+        while ((esc = strchr(start, '\\')) != NULL) {
+                /**
+                 * Only copy bytes from previous upto but not including the
+                 * backslash
+                 */
+                strncpy(cursor, start, esc - start);
+                cursor += (esc - start);
+
+                /**
+                 * If *(esc + 1) is the null byte, then it will be an invalid
+                 * escape sequence since this implies '\' is the last character
+                 * in the string and there is no '\' before it to esape it.
+                 *
+                 * Handled safely by default case
+                 */
+
+                switch (*(esc + 1)) {
+                case 'a':
+                        *cursor = 0x07;
+                        break;
+                case 'b':
+                        *cursor = 0x08;
+                        break;
+                case 'e':
+                        *cursor = 0x1B;
+                        break;
+                case 'f':
+                        *cursor = 0x1C;
+                        break;
+                case 'n':
+                        *cursor = 0x0A;
+                        break;
+                case 'r':
+                        *cursor = 0x0D;
+                        break;
+                case 'v':
+                        *cursor = 0x0B;
+                        break;
+                case '\\':
+                        *cursor = 0x5C;
+                        break;
+                case '\'':
+                        *cursor = 0x27;
+                        break;
+                case '\"':
+                        *cursor = 0x22;
+                        break;
+                case '\?':
+                        *cursor = 0x3F;
+                        break;
+                default:
+                        register_error(PARSE_ERROR, "unknown escape sequence",
+                                       line);
+                        break;
+                }
+
+                cursor++;
+
+                /**
+                 * Increment esc pointer by 2, one for escape code and another
+                 * to mark start of string. Set result to start pointer so next
+                 * iteration start search from after the escape sequence.
+                 */
+                start = esc + 2;
+        }
+
+        strcpy(cursor, start);
+}
+
 void string(char *code, int *c, int line) {
         char *start = &(code[*c]) + 1;
 
@@ -166,10 +246,18 @@ void string(char *code, int *c, int line) {
         char *end = &code[*c];
 
         char str[end - start + 2];
+        char unescaped_str[end - start + 2];
 
         nstrcp(str, start, end - start + 1);
 
-        add_token(STRING, str, line);
+        /**
+         * The unescaped string can only be shorter than the escaped string,
+         * therefore it is safe to pass a buffer the same size as the original
+         * string.
+         */
+        unescape_string(str, unescaped_str, line);
+
+        add_token(STRING, unescaped_str, line);
 
         (*c)++;
 }

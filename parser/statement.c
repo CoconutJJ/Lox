@@ -26,7 +26,7 @@ ASSIGNMENT_STATEMENT * parse_assignment(TOKEN **current);
 DECLARATION_STATEMENT *parse_declaration(TOKEN **current);
 PRINT_STATEMENT *      parse_print(TOKEN **current);
 
-inline int is_at_end(TOKEN **current) { return (*current) == NULL; }
+int is_at_end(TOKEN **current) { return (*current) == NULL; }
 
 int match_token(TOKEN **current, TOKEN_T t) {
         if (is_at_end(current)) {

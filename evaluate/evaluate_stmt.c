@@ -104,11 +104,11 @@ void evaluate_print_statement(PRINT_STATEMENT* stmt, ENVIRONMENT* env) {
         switch (res->expr_t) {
         case EXPR_T_NUMBER:;
                 EXPR_NUM* num = (EXPR_NUM*)res;
-                printf("%lf\n", num->data);
+                printf("%lf", num->data);
                 break;
         case EXPR_T_STRING:;
                 EXPR_STR* str = (EXPR_STR*)res;
-                printf("%s\n", str->data);
+                printf("%s", str->data);
                 break;
         case EXPR_T_BOOL:;
                 EXPR_BOOL* bl = (EXPR_BOOL*)res;

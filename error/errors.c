@@ -20,7 +20,7 @@
 void register_error(ERROR_T type, char *msg, int line) {
         switch (type) {
         case PARSE_ERROR:
-                fprintf(stderr, "parse error: line %d: %s", line, msg);
+                fprintf(stderr, "parse error: line %d: %s\n", line, msg);
                 break;
         case SYNTAX_ERROR:
                 fprintf(stderr, "syntax error: line %d: %s\n", line, msg);
