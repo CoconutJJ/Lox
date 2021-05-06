@@ -158,7 +158,8 @@ void string(char *code, int *c, int line) {
 
         while (peek(code, c) != '"') {
                 if (token_at_end(code, c))
-                        parse_error("expected end-quote from string", line);
+                        register_error(PARSE_ERROR,
+                                       "expected end-quote from string", line);
 
                 (*c)++;
         }
@@ -234,7 +235,8 @@ TOKEN *tokenize(char *code) {
                         if (match(code, &c, '&')) {
                                 add_token(AND, NULL, line);
                         } else {
-                                parse_error(
+                                register_error(
+                                    PARSE_ERROR,
                                     "unknown symbol &. Did you mean && "
                                     "?",
                                     line);
@@ -245,7 +247,8 @@ TOKEN *tokenize(char *code) {
                         if (match(code, &c, '|')) {
                                 add_token(OR, NULL, line);
                         } else {
-                                parse_error(
+                                register_error(
+                                    PARSE_ERROR,
                                     "unknown symbol |. Did you mean || "
                                     "?",
                                     line);
@@ -295,7 +298,8 @@ TOKEN *tokenize(char *code) {
                         } else if (is_num(code[c])) {
                                 number(code, &c, line);
                         } else {
-                                parse_error("unknown symbol", line);
+                                register_error(PARSE_ERROR, "unknown symbol",
+                                               line);
                         }
                 }
                 c++;

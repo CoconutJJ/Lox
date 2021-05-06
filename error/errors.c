@@ -18,20 +18,16 @@
 #include "../types.h"
 
 void register_error(ERROR_T type, char *msg, int line) {
-
         switch (type) {
+        case PARSE_ERROR:
+                fprintf(stderr, "parse error: line %d: %s", line, msg);
+                break;
         case SYNTAX_ERROR:
                 fprintf(stderr, "syntax error: line %d: %s\n", line, msg);
-                exit(EXIT_FAILURE);
                 break;
         case RUNTIME_ERROR:
                 fprintf(stderr, "runtime error: line %d: %s\n", line, msg);
-                exit(EXIT_FAILURE);
+                break;
         }
-}
-
-void parse_error(char *msg, int line) {
-
-        fprintf(stderr, "parse error: line %d: %s", line, msg);
         exit(EXIT_FAILURE);
 }

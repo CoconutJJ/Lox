@@ -129,14 +129,15 @@ EXPR_BIN_OP *parse_left_assoc_bin_op(
 }
 
 EXPR_OP *parse_primary(TOKEN **current) {
-        TOKEN *old = *current;
-        int line = old->line;
+        TOKEN *old  = *current;
+        int    line = old->line;
         if (match_op(current, EXPR_V_LEFT_PAREN)) {
                 EXPR_OP *primary = (EXPR_OP *)parse_equality(current);
 
                 if (!match_op(current, EXPR_V_RIGHT_PAREN)) {
-                        parse_error("Expected closing parentheses.",
-                                    (*current)->line);
+                        register_error(PARSE_ERROR,
+                                       "Expected closing parentheses.",
+                                       (*current)->line);
                 }
                 return primary;
         }
@@ -148,7 +149,8 @@ EXPR_OP *parse_primary(TOKEN **current) {
         }
 
         if (match_op(current, EXPR_V_NUMBER)) {
-                EXPR_OP *num = (EXPR_OP *)create_expr_num(strtod(old->value, NULL), line);
+                EXPR_OP *num =
+                    (EXPR_OP *)create_expr_num(strtod(old->value, NULL), line);
 
                 return num;
         }
@@ -166,7 +168,7 @@ EXPR_OP *parse_primary(TOKEN **current) {
         }
 
         if (match_op(current, EXPR_V_VAR)) {
-                EXPR_OP * var = (EXPR_OP*) create_expr_var(old->value, line);
+                EXPR_OP *var = (EXPR_OP *)create_expr_var(old->value, line);
 
                 return var;
         }
@@ -178,7 +180,7 @@ EXPR_OP *parse_primary(TOKEN **current) {
 
 EXPR_OP *parse_unary(TOKEN **current) {
         TOKEN *curr_op = *current;
-        int line = curr_op->line;
+        int    line    = curr_op->line;
         if (match_op(current, EXPR_V_NOT) || match_op(current, EXPR_V_MINUS)) {
                 EXPR_UNR_OP *op = create_expr_unr_op(peek_op(&curr_op), line);
 
@@ -233,6 +235,4 @@ EXPR_OP *parse_equality(TOKEN **current) {
                                                   parse_comparison, ops, 2);
 }
 
-EXPR_OP *parse_expr(TOKEN **current) { 
-        return parse_equality(current); 
-}
+EXPR_OP *parse_expr(TOKEN **current) { return parse_equality(current); }

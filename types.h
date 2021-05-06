@@ -20,7 +20,7 @@
 #define AS_EXPR_OP_PTR(r) ((EXPR_OP *)(r))
 
 typedef enum _error_t {
-
+        PARSE_ERROR,
         SYNTAX_ERROR,
         RUNTIME_ERROR
 

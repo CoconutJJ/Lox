@@ -12,11 +12,9 @@
     You should have received a copy of the GNU General Public License along with
     this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PARSE_ERRORS_H
-#define PARSE_ERRORS_H
+#ifndef ERRORS_H
+#define ERRORS_H
 #include "../types.h"
-
-void parse_error(char *msg, int line);
 
 void register_error(ERROR_T type, char *msg, int line);
 
