@@ -221,7 +221,6 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
         if (!match_token(current, LEFT_PAREN)) {
                 register_error(SYNTAX_ERROR, "missing ( after IF statement",
                                (*current)->line);
-                return NULL;
         }
 
         EXPR_OP *cond = parse_expr(current);
@@ -229,13 +228,11 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
         if (!match_token(current, RIGHT_PAREN)) {
                 register_error(SYNTAX_ERROR, "missing ) after IF statement",
                                (*current)->line);
-                return NULL;
         }
 
         if (!match_token(current, LEFT_BRACE)) {
                 register_error(SYNTAX_ERROR, "missing { after IF clause",
                                (*current)->line);
-                return NULL;
         }
 
         STATEMENT *if_body = parse_stmt(current);
@@ -243,12 +240,95 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
         if (!match_token(current, RIGHT_BRACE)) {
                 register_error(SYNTAX_ERROR, "missing } after IF clause",
                                (*current)->line);
-                return NULL;
         }
 
-        STATEMENT *else_body = NULL;
+        STATEMENT *       else_body = NULL;
+        IFELSE_STATEMENT *curr      = NULL;
 
         if (match_token(current, ELSE)) {
+
+                /**
+                 * TODO: If-Else-If has bad scoping issues 
+                 *
+                 * The way we chain If-Else-If statements causes issues in the
+                 * hashmap scoping method we use during evaluation. The runtime
+                 * calls down_scope() everytime an elif condition is evaluated
+                 * to be false. This is because the runtime is not aware of
+                 * else-if statements and believes we are running a simple else
+                 * block.
+                 */
+
+                while (1) {
+                        if (!match_token(current, IF)) break;
+
+                        if (!match_token(current, LEFT_PAREN)) {
+                                register_error(
+                                    SYNTAX_ERROR,
+                                    "missing ( after ELSE-IF statement",
+                                    (*current)->line);
+                        }
+
+                        EXPR_OP *elif_cond = parse_expr(current);
+
+                        if (!match_token(current, RIGHT_PAREN)) {
+                                register_error(
+                                    SYNTAX_ERROR,
+                                    "missing ) after ELSE-IF statement",
+                                    (*current)->line);
+                        }
+
+                        if (!match_token(current, LEFT_BRACE)) {
+                                register_error(SYNTAX_ERROR,
+                                               "missing { after ELSE-IF clause",
+                                               (*current)->line);
+                        }
+
+                        IFELSE_STATEMENT *elif = create_ifelse_stmt();
+
+                        elif->cond_expr = elif_cond;
+                        elif->if_clause = parse_stmt(current);
+
+                        if (!match_token(current, RIGHT_BRACE)) {
+                                register_error(SYNTAX_ERROR,
+                                               "missing } after ELSE-IF clause",
+                                               (*current)->line);
+                        }
+
+                        if (curr) {
+                                curr->else_clause = elif;
+                        } else {
+                                else_body = elif;
+                        }
+
+                        /**
+                         * Set curr to the next if-else statement in the chain.
+                         */
+
+                        curr = elif;
+
+                        /**
+                         * Try matching the next ELSE or ELSE-IF clause.
+                         *
+                         * If it's a standalone ELSE clause, then next iteration
+                         * will break since the expected next symbol will be
+                         * LEFT_BRACE and not IF.
+                         *
+                         * If it's a IF clause, then next iteration will proceed
+                         * like normal.
+                         */
+                        if (match_token(current, ELSE)) {
+                                continue;
+                        } else {
+                                /**
+                                 * This IF-ELIF-ELSE chain has no ELSE
+                                 * statement, skip parsing for LEFT_BRACE and
+                                 * RIGHT_BRACE after loop exit, jump directly to
+                                 * the return statement assignments.
+                                 */
+                                goto create_ifelse_body;
+                        }
+                }
+
                 if (!match_token(current, LEFT_BRACE)) {
                         register_error(SYNTAX_ERROR,
                                        "missing { after ELSE statement",
@@ -257,7 +337,15 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                         return NULL;
                 }
 
-                else_body = parse_stmt(current);
+                /**
+                 * We need to check here if the else clause is standalone
+                 * or a footer to a series of else-if clauses.
+                 */
+                if (curr) {
+                        curr->else_clause = parse_stmt(current);
+                } else {
+                        else_body = parse_stmt(current);
+                }
 
                 if (!match_token(current, RIGHT_BRACE)) {
                         register_error(SYNTAX_ERROR,
@@ -268,6 +356,7 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                 }
         }
 
+create_ifelse_body:
         new_ifelse->cond_expr   = cond;
         new_ifelse->if_clause   = if_body;
         new_ifelse->else_clause = else_body;
