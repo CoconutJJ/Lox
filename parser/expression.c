@@ -113,9 +113,11 @@ EXPR_BIN_OP *parse_left_assoc_bin_op(
 
                 if (op == (EXPR_V)-1) break;
 
+                int line = (*current)->line;
+
                 EXPR_OP *r = right(current);
 
-                EXPR_BIN_OP *root = create_expr_bin_op(op);
+                EXPR_BIN_OP *root = create_expr_bin_op(op, line);
 
                 root->left  = l;
                 root->right = r;
@@ -128,7 +130,7 @@ EXPR_BIN_OP *parse_left_assoc_bin_op(
 
 EXPR_OP *parse_primary(TOKEN **current) {
         TOKEN *old = *current;
-
+        int line = old->line;
         if (match_op(current, EXPR_V_LEFT_PAREN)) {
                 EXPR_OP *primary = (EXPR_OP *)parse_equality(current);
 
@@ -140,31 +142,31 @@ EXPR_OP *parse_primary(TOKEN **current) {
         }
 
         if (match_op(current, EXPR_V_STRING)) {
-                EXPR_OP *str = (EXPR_OP *)create_expr_str(old->value);
+                EXPR_OP *str = (EXPR_OP *)create_expr_str(old->value, line);
 
                 return str;
         }
 
         if (match_op(current, EXPR_V_NUMBER)) {
-                EXPR_OP *num = (EXPR_OP *)create_expr_num(strtod(old->value, NULL));
+                EXPR_OP *num = (EXPR_OP *)create_expr_num(strtod(old->value, NULL), line);
 
                 return num;
         }
 
         if (match_op(current, EXPR_V_TRUE)) {
-                EXPR_OP *bl = (EXPR_OP *)create_expr_bool(1);
+                EXPR_OP *bl = (EXPR_OP *)create_expr_bool(1, line);
 
                 return bl;
         }
 
         if (match_op(current, EXPR_V_FALSE)) {
-                EXPR_OP *bl = (EXPR_OP *)create_expr_bool(0);
+                EXPR_OP *bl = (EXPR_OP *)create_expr_bool(0, line);
 
                 return bl;
         }
 
         if (match_op(current, EXPR_V_VAR)) {
-                EXPR_OP * var = (EXPR_OP*) create_expr_var(old->value);
+                EXPR_OP * var = (EXPR_OP*) create_expr_var(old->value, line);
 
                 return var;
         }
@@ -176,9 +178,9 @@ EXPR_OP *parse_primary(TOKEN **current) {
 
 EXPR_OP *parse_unary(TOKEN **current) {
         TOKEN *curr_op = *current;
-
+        int line = curr_op->line;
         if (match_op(current, EXPR_V_NOT) || match_op(current, EXPR_V_MINUS)) {
-                EXPR_UNR_OP *op = create_expr_unr_op(peek_op(&curr_op));
+                EXPR_UNR_OP *op = create_expr_unr_op(peek_op(&curr_op), line);
 
                 op->body = (EXPR_OP *)parse_unary(current);
 

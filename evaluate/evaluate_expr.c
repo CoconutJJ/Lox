@@ -51,23 +51,27 @@ int is_truthy(EXPR_OP *val) {
         }
 }
 
+/**
+ * Deep copies a leaf node from the expression tree and returns the new EXPR
+ * struct.
+ */
 EXPR_OP *copy_leaf(EXPR_OP *op) {
         switch (op->expr_t) {
         case EXPR_T_NUMBER:;
                 EXPR_NUM *num = (EXPR_NUM *)op;
-                return (EXPR_OP *)create_expr_num(num->data);
+                return (EXPR_OP *)create_expr_num(num->data, op->line);
                 break;
         case EXPR_T_STRING:;
                 EXPR_STR *str = (EXPR_STR *)op;
-                return (EXPR_OP *)create_expr_str(str->data);
+                return (EXPR_OP *)create_expr_str(str->data, op->line);
                 break;
         case EXPR_T_BOOL:;
                 EXPR_BOOL *bl = (EXPR_BOOL *)op;
-                return (EXPR_OP *)create_expr_bool(bl->data);
+                return (EXPR_OP *)create_expr_bool(bl->data, op->line);
                 break;
         case EXPR_T_VAR:;
                 EXPR_VAR *var = (EXPR_VAR *)op;
-                return (EXPR_OP *)create_expr_var(var->var);
+                return (EXPR_OP *)create_expr_var(var->var, op->line);
                 break;
         default:
                 fprintf(stderr, "bug: copy_leaf: recieved invalid enum");
@@ -81,15 +85,17 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
         if (!tree) return NULL;
         
         EXPR_OP *result;
-
+        int line = tree->line;
         switch (tree->expr_t) {
         case EXPR_T_BINARY:;  // <-- very important semicolon, do not remove.
 
                 EXPR_BIN_OP *binop = (EXPR_BIN_OP *)tree;
-
+                
                 EXPR_OP *left  = evaluate_expr(binop->left, env);
                 EXPR_OP *right = evaluate_expr(binop->right, env);
                 
+                
+
                 switch (binop->op) {
                 case EXPR_V_PLUS:
 
@@ -97,7 +103,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_num(
                                     ((EXPR_NUM *)left)->data +
-                                    ((EXPR_NUM *)right)->data);
+                                    ((EXPR_NUM *)right)->data, line);
 
                         } else if (left->expr_t == EXPR_T_STRING &&
                                    right->expr_t == EXPR_T_STRING) {
@@ -111,7 +117,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                                 strcpy(concat, left_str->data);
                                 strcat(concat, right_str->data);
 
-                                result = (EXPR_OP *)create_expr_str(concat);
+                                result = (EXPR_OP *)create_expr_str(concat, line);
                         }
 
                         break;
@@ -121,20 +127,22 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_num(
                                     ((EXPR_NUM *)left)->data -
-                                    ((EXPR_NUM *)right)->data);
+                                    ((EXPR_NUM *)right)->data, line);
+                        } else {
+                                register_error(RUNTIME_ERROR, "Cannot perform minus operation on variables of non numeric type", line);
                         }
 
                         break;
                 case EXPR_V_AND:;
 
                         result = (EXPR_OP *)create_expr_bool(is_truthy(left) &&
-                                                             is_truthy(right));
+                                                             is_truthy(right), line);
 
                         break;
                         ;
                 case EXPR_V_OR:;
                         result = (EXPR_OP *)create_expr_bool(is_truthy(left) ||
-                                                             is_truthy(right));
+                                                             is_truthy(right), line);
 
                         break;
                 case EXPR_V_EQUAL_EQUAL:
@@ -144,7 +152,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                                 EXPR_NUM *right_num = (EXPR_NUM *)right;
 
                                 return (EXPR_OP *) create_expr_bool(left_num->data ==
-                                                        right_num->data);
+                                                        right_num->data, line);
 
                         } else if (left->expr_t == EXPR_T_STRING &&
                                    right->expr_t == EXPR_T_STRING) {
@@ -153,13 +161,13 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
 
                                 return (EXPR_OP *) create_expr_bool(
                                     strcmp(left_str->data, right_str->data) ==
-                                    0);
+                                    0, line);
                         } else if (left->expr_t == EXPR_T_BOOL &&
                                    right->expr_t == EXPR_T_BOOL) {
                                 return (EXPR_OP *) create_expr_bool(is_truthy(left) ==
-                                                        is_truthy(right));
+                                                        is_truthy(right), line);
                         } else {
-                                return (EXPR_OP *) create_expr_bool(0);
+                                return (EXPR_OP *) create_expr_bool(0, line);
                         }
                         break;
                 case EXPR_V_MULTIPLY:
@@ -167,7 +175,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_num(
                                     ((EXPR_NUM *)left)->data *
-                                    ((EXPR_NUM *)right)->data);
+                                    ((EXPR_NUM *)right)->data, line);
                         }
                         break;
                 case EXPR_V_DIVIDE:
@@ -175,7 +183,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_num(
                                     ((EXPR_NUM *)left)->data /
-                                    ((EXPR_NUM *)right)->data);
+                                    ((EXPR_NUM *)right)->data, line);
                         }
                         break;
                 case EXPR_V_GREATER:
@@ -183,7 +191,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_bool(
                                     ((EXPR_NUM *)left)->data >
-                                    ((EXPR_NUM *)right)->data);
+                                    ((EXPR_NUM *)right)->data, line);
                         }
                         break;
                 case EXPR_V_LESS:
@@ -191,7 +199,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_bool(
                                     ((EXPR_NUM *)left)->data <
-                                    ((EXPR_NUM *)right)->data);
+                                    ((EXPR_NUM *)right)->data, line);
                         }
                         break;
                 case EXPR_V_GREATER_EQ:
@@ -199,7 +207,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_bool(
                                     ((EXPR_NUM *)left)->data >=
-                                    ((EXPR_NUM *)right)->data);
+                                    ((EXPR_NUM *)right)->data, line);
                         }
                         break;
                 case EXPR_V_LESS_EQ:
@@ -207,7 +215,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_bool(
                                     ((EXPR_NUM *)left)->data <=
-                                    ((EXPR_NUM *)right)->data);
+                                    ((EXPR_NUM *)right)->data, line);
                         }
                         break;
                 default:
@@ -232,7 +240,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                 switch (unrop->op) {
                 case EXPR_V_NOT:
 
-                        result = (EXPR_OP *)create_expr_bool(!is_truthy(body));
+                        result = (EXPR_OP *)create_expr_bool(!is_truthy(body), line);
 
                         break;
                 case EXPR_V_MINUS:
@@ -241,7 +249,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                                 EXPR_NUM *num = (EXPR_NUM *)body;
 
                                 result =
-                                    (EXPR_OP *)create_expr_num(0.0 - num->data);
+                                    (EXPR_OP *)create_expr_num(0.0 - num->data, line);
                         }
 
                         break;

@@ -147,6 +147,7 @@ typedef enum _op_t {
  */
 typedef struct _op {
         EXPR_T expr_t;
+        int line;
 } EXPR_OP;
 
 typedef struct _expr_bin_op {
