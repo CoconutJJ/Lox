@@ -81,20 +81,17 @@ EXPR_OP *copy_leaf(EXPR_OP *op) {
 }
 
 EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
-        
         if (!tree) return NULL;
-        
+
         EXPR_OP *result;
-        int line = tree->line;
+        int      line = tree->line;
         switch (tree->expr_t) {
         case EXPR_T_BINARY:;  // <-- very important semicolon, do not remove.
 
                 EXPR_BIN_OP *binop = (EXPR_BIN_OP *)tree;
-                
+
                 EXPR_OP *left  = evaluate_expr(binop->left, env);
                 EXPR_OP *right = evaluate_expr(binop->right, env);
-                
-                
 
                 switch (binop->op) {
                 case EXPR_V_PLUS:
@@ -103,7 +100,8 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_num(
                                     ((EXPR_NUM *)left)->data +
-                                    ((EXPR_NUM *)right)->data, line);
+                                        ((EXPR_NUM *)right)->data,
+                                    line);
 
                         } else if (left->expr_t == EXPR_T_STRING &&
                                    right->expr_t == EXPR_T_STRING) {
@@ -117,7 +115,8 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                                 strcpy(concat, left_str->data);
                                 strcat(concat, right_str->data);
 
-                                result = (EXPR_OP *)create_expr_str(concat, line);
+                                result =
+                                    (EXPR_OP *)create_expr_str(concat, line);
                         }
 
                         break;
@@ -127,22 +126,27 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_num(
                                     ((EXPR_NUM *)left)->data -
-                                    ((EXPR_NUM *)right)->data, line);
+                                        ((EXPR_NUM *)right)->data,
+                                    line);
                         } else {
-                                register_error(RUNTIME_ERROR, "Cannot perform minus operation on variables of non numeric type", line);
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot perform minus operation on "
+                                    "variables of non numeric type",
+                                    line);
                         }
 
                         break;
                 case EXPR_V_AND:;
 
-                        result = (EXPR_OP *)create_expr_bool(is_truthy(left) &&
-                                                             is_truthy(right), line);
+                        result = (EXPR_OP *)create_expr_bool(
+                            is_truthy(left) && is_truthy(right), line);
 
                         break;
                         ;
                 case EXPR_V_OR:;
-                        result = (EXPR_OP *)create_expr_bool(is_truthy(left) ||
-                                                             is_truthy(right), line);
+                        result = (EXPR_OP *)create_expr_bool(
+                            is_truthy(left) || is_truthy(right), line);
 
                         break;
                 case EXPR_V_EQUAL_EQUAL:
@@ -151,23 +155,24 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                                 EXPR_NUM *left_num  = (EXPR_NUM *)left;
                                 EXPR_NUM *right_num = (EXPR_NUM *)right;
 
-                                return (EXPR_OP *) create_expr_bool(left_num->data ==
-                                                        right_num->data, line);
+                                return (EXPR_OP *)create_expr_bool(
+                                    left_num->data == right_num->data, line);
 
                         } else if (left->expr_t == EXPR_T_STRING &&
                                    right->expr_t == EXPR_T_STRING) {
                                 EXPR_STR *left_str  = (EXPR_STR *)left;
                                 EXPR_STR *right_str = (EXPR_STR *)right;
 
-                                return (EXPR_OP *) create_expr_bool(
+                                return (EXPR_OP *)create_expr_bool(
                                     strcmp(left_str->data, right_str->data) ==
-                                    0, line);
+                                        0,
+                                    line);
                         } else if (left->expr_t == EXPR_T_BOOL &&
                                    right->expr_t == EXPR_T_BOOL) {
-                                return (EXPR_OP *) create_expr_bool(is_truthy(left) ==
-                                                        is_truthy(right), line);
+                                return (EXPR_OP *)create_expr_bool(
+                                    is_truthy(left) == is_truthy(right), line);
                         } else {
-                                return (EXPR_OP *) create_expr_bool(0, line);
+                                return (EXPR_OP *)create_expr_bool(0, line);
                         }
                         break;
                 case EXPR_V_MULTIPLY:
@@ -175,7 +180,14 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_num(
                                     ((EXPR_NUM *)left)->data *
-                                    ((EXPR_NUM *)right)->data, line);
+                                        ((EXPR_NUM *)right)->data,
+                                    line);
+                        } else {
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot perform multiply operation on "
+                                    "variables of non numeric type",
+                                    line);
                         }
                         break;
                 case EXPR_V_DIVIDE:
@@ -183,7 +195,14 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_num(
                                     ((EXPR_NUM *)left)->data /
-                                    ((EXPR_NUM *)right)->data, line);
+                                        ((EXPR_NUM *)right)->data,
+                                    line);
+                        } else {
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot perform divide operation on "
+                                    "variables of non numeric type",
+                                    line);
                         }
                         break;
                 case EXPR_V_GREATER:
@@ -191,7 +210,14 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_bool(
                                     ((EXPR_NUM *)left)->data >
-                                    ((EXPR_NUM *)right)->data, line);
+                                        ((EXPR_NUM *)right)->data,
+                                    line);
+                        } else {
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot perform greater-than operation on "
+                                    "variables of non numeric type",
+                                    line);
                         }
                         break;
                 case EXPR_V_LESS:
@@ -199,7 +225,14 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_bool(
                                     ((EXPR_NUM *)left)->data <
-                                    ((EXPR_NUM *)right)->data, line);
+                                        ((EXPR_NUM *)right)->data,
+                                    line);
+                        } else {
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot perform less-than operation on "
+                                    "variables of non numeric type",
+                                    line);
                         }
                         break;
                 case EXPR_V_GREATER_EQ:
@@ -207,7 +240,15 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_bool(
                                     ((EXPR_NUM *)left)->data >=
-                                    ((EXPR_NUM *)right)->data, line);
+                                        ((EXPR_NUM *)right)->data,
+                                    line);
+                        } else {
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot perform greater-than-equal "
+                                    "operation on variables of non numeric "
+                                    "type",
+                                    line);
                         }
                         break;
                 case EXPR_V_LESS_EQ:
@@ -215,7 +256,14 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                             right->expr_t == EXPR_T_NUMBER) {
                                 result = (EXPR_OP *)create_expr_bool(
                                     ((EXPR_NUM *)left)->data <=
-                                    ((EXPR_NUM *)right)->data, line);
+                                        ((EXPR_NUM *)right)->data,
+                                    line);
+                        } else {
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot perform less-than-equal operation "
+                                    "on variables of non numeric type",
+                                    line);
                         }
                         break;
                 default:
@@ -230,7 +278,6 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                 free(left);
                 free(right);
 
-
                 return result;
                 break;
         case EXPR_T_UNARY:;  // <-- very important semicolon. do not remove.
@@ -240,7 +287,8 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                 switch (unrop->op) {
                 case EXPR_V_NOT:
 
-                        result = (EXPR_OP *)create_expr_bool(!is_truthy(body), line);
+                        result =
+                            (EXPR_OP *)create_expr_bool(!is_truthy(body), line);
 
                         break;
                 case EXPR_V_MINUS:
@@ -248,8 +296,13 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                         if (body->expr_t == EXPR_T_NUMBER) {
                                 EXPR_NUM *num = (EXPR_NUM *)body;
 
-                                result =
-                                    (EXPR_OP *)create_expr_num(0.0 - num->data, line);
+                                result = (EXPR_OP *)create_expr_num(
+                                    0.0 - num->data, line);
+                        } else {
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot make non-numeric type negative",
+                                    line);
                         }
 
                         break;
@@ -263,7 +316,7 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                  * Free the body copied by copy_leaf()
                  */
                 free(body);
-                
+
                 return result;
         case EXPR_T_VAR:;
 
