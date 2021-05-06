@@ -117,7 +117,14 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
 
                                 result =
                                     (EXPR_OP *)create_expr_str(concat, line);
+                        } else {
+                                register_error(
+                                    RUNTIME_ERROR,
+                                    "Cannot perform plus operation on "
+                                    "variables of non numeric type",
+                                    line);
                         }
+
 
                         break;
                 case EXPR_V_MINUS:
