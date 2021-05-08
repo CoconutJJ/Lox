@@ -61,7 +61,7 @@ typedef enum _token_t_ {
         NUMBER,
         OR,
         PLUS,
-        PRINT, 
+        PRINT,
         RETURN,
         RIGHT_BRACE,
         RIGHT_PAREN,
@@ -98,24 +98,24 @@ typedef struct _token {
 
 typedef enum _op_v {
         EXPR_V_AND,
-        EXPR_V_OR,
-        EXPR_V_PLUS,
-        EXPR_V_MINUS,
+        EXPR_V_BANG_EQUAL,
         EXPR_V_DIVIDE,
+        EXPR_V_EQUAL_EQUAL,
+        EXPR_V_FALSE,
+        EXPR_V_GREATER,
+        EXPR_V_GREATER_EQ,
+        EXPR_V_LEFT_PAREN,
+        EXPR_V_LESS,
+        EXPR_V_LESS_EQ,
+        EXPR_V_MINUS,
         EXPR_V_MULTIPLY,
         EXPR_V_NOT,
-        EXPR_V_GREATER,
-        EXPR_V_LESS,
-        EXPR_V_GREATER_EQ,
-        EXPR_V_LESS_EQ,
-        EXPR_V_EQUAL_EQUAL,
-        EXPR_V_BANG_EQUAL,
-        EXPR_V_LEFT_PAREN,
-        EXPR_V_RIGHT_PAREN,
         EXPR_V_NUMBER,
+        EXPR_V_OR,
+        EXPR_V_PLUS,
+        EXPR_V_RIGHT_PAREN,
         EXPR_V_STRING,
         EXPR_V_TRUE,
-        EXPR_V_FALSE,
         EXPR_V_VAR
 } EXPR_V;
 
@@ -129,10 +129,10 @@ typedef enum _op_v {
 typedef enum _op_t {
 
         EXPR_T_BINARY,
-        EXPR_T_UNARY,
-        EXPR_T_STRING,
-        EXPR_T_NUMBER,
         EXPR_T_BOOL,
+        EXPR_T_NUMBER,
+        EXPR_T_STRING,
+        EXPR_T_UNARY,
         EXPR_T_VAR
 
 } EXPR_T;
@@ -147,7 +147,7 @@ typedef enum _op_t {
  */
 typedef struct _op {
         EXPR_T expr_t;
-        int line;
+        int    line;
 } EXPR_OP;
 
 typedef struct _expr_bin_op {
@@ -186,6 +186,9 @@ typedef struct _expr_unr_op {
 } EXPR_UNR_OP;
 
 typedef struct statement_t {
+        struct statement_t *next;
+        int                 line;
+
         enum {
                 E_IFELSE_STATEMENT,
                 E_WHILE_STATEMENT,
@@ -194,8 +197,7 @@ typedef struct statement_t {
                 E_DECLARATION_STATEMENT,
                 E_PRINT_STATEMENT
         } type;
-        int                 line;
-        struct statement_t *next;
+
 } STATEMENT;
 
 typedef struct _ifelse_statement {

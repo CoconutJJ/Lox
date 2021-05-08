@@ -5,6 +5,56 @@
 This project is my first dedicated attempt into a creating a recursive descent
 interpreted language. It is full of questionable design decisions.
 
+# Language Syntax
+```
+<STATEMENT>     =   | <STATEMENT> <STATEMENT>
+                    | if (<EXPR>) { <STATEMENT> } <ENDIF>
+                    | while (<EXPR>) { <STATEMENT> }
+                    | var <IDENTIFIER> = <EXPR>
+                    | <IDENTIFIER> = <EXPR>
+                    | ""
+
+<ENDIF>         =   | else { <STATEMENT> }
+                    | else if { <STATEMENT> } <ENDIF>
+                    | ""
+
+<EXPR>          =   | <EXPR-EQUAL> == <EXPR-EQUAL>
+                    | <EXPR-EQUAL>
+
+<EXPR-EQUAL>    =   | <EXPR-CMP> > <EXPR-CMP>
+                    | <EXPR-CMP> >= <EXPR-CMP>
+                    | <EXPR-CMP> < <EXPR-CMP>
+                    | <EXPR-CMP> <= <EXPR-CMP>
+                    | <EXPR-CMP>
+
+<EXPR-CMP>      =   | <EXPR-OR> || <EXPR-OR>
+                    | <EXPR-OR>
+
+<EXPR-OR>       =   | <EXPR-AND> && <EXPR-AND>
+                    | <EXPR-AND>
+
+<EXPR-AND>      =   | <EXPR-SUM> + <EXPR-SUM>
+                    | <EXPR-SUM> - <EXPR-SUM>
+                    | <EXPR-SUM>
+
+<EXPR-SUM>      =   | <EXPR-PROD> * <EXPR-PROD>
+                    | <EXPR-PROD> / <EXPR-PROD>
+                    | <EXPR-PROD>
+
+<EXPR-PROD>     =   | <EXPR-UNR>
+
+<EXPR-UNR>      =   | ! <EXPR-UNR>
+                    | - <EXPR-UNR>
+                    | <EXPR-PRIMARY>
+
+<EXPR-PRIMARY>  =   | ( <EXPR> )
+                    | <STRING>
+                    | <NUMBER>
+                    | TRUE
+                    | FALSE
+                    | <IDENTIFIER>
+```
+
 ## How to compile and run
 
 This project is trivial to compile
