@@ -13,7 +13,7 @@
     this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-
+#include <string.h>
 #include "../error/errors.h"
 #include "../types.h"
 #include "assert.h"
@@ -137,7 +137,7 @@ ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
 
         ASSIGNMENT_STATEMENT *new_assignment = create_assignment_stmt();
 
-        new_assignment->identifier_name  = ident->value;
+        new_assignment->identifier_name  = strdup(ident->value);
         new_assignment->identifier_value = assign_value;
         new_assignment->_statement_.line = ident->line;
         return new_assignment;
@@ -161,7 +161,7 @@ DECLARATION_STATEMENT *parse_declaration(TOKEN **current) {
 
         DECLARATION_STATEMENT *new_declaration = create_declaration_stmt();
 
-        new_declaration->identifier_name  = ident->value;
+        new_declaration->identifier_name  = strdup(ident->value);
         new_declaration->identifier_value = assign_value;
         new_declaration->_statement_.line = ident->line;
         return new_declaration;

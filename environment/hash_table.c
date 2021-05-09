@@ -298,7 +298,7 @@ int hashtable_has(HashTable *t, char *key) {
                     strcmp(t->table[index].key, key) == 0)
                         return 1;
 
-                currIndex++;
+                currIndex = (currIndex + 1) % t->size;
 
                 if (currIndex == index) return 0;
         }
