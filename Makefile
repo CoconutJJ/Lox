@@ -3,7 +3,7 @@ FLAGS=-g -Wall -Wextra -pedantic -O3
 OBJECTS=errors.o hash_table.o environment.o expression.o evaluate_expr.o expression_utils.o statement.o evaluate_stmt.o statement_utils.o token.o utils.o
 
 dev: $(OBJECTS)  main.c
-	gcc $(FLAGS) $(OBJECTS) main.c -o interp
+	gcc $(FLAGS) $(OBJECTS) main.c -o lox
 
 errors.o: error/errors.c
 	gcc $(FLAGS) -c error/errors.c -o errors.o

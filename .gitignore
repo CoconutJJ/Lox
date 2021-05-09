@@ -1,6 +1,7 @@
 *.o
 .vscode/
-interp
+lox
 # Temp files I sometimes create for testing purposes.
 code.txt
 code.diff
+vg_logfile.out

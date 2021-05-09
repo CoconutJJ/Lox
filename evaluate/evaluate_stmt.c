@@ -13,7 +13,7 @@
     this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdio.h>
-
+#include <stdlib.h>
 #include "../environment/environment.h"
 #include "../error/errors.h"
 #include "../types.h"
@@ -22,14 +22,16 @@
 void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env);
 
 void evaluate_ifelse_statement(IFELSE_STATEMENT* stmt, ENVIRONMENT* env) {
-        if (is_truthy(evaluate_expr(stmt->cond_expr, env))) {
+        EXPR_OP* res = evaluate_expr(stmt->cond_expr, env);
+        if (is_truthy(res)) {
+                free(res);
                 env = down_scope(env);
 
                 evaluate_statements(stmt->if_clause, env);
 
                 env = up_scope(env);
-
         } else {
+                free(res);
                 if (!stmt->else_clause) return;
 
                 env = down_scope(env);
@@ -41,13 +43,16 @@ void evaluate_ifelse_statement(IFELSE_STATEMENT* stmt, ENVIRONMENT* env) {
 }
 
 void evaluate_while_statement(WHILE_STATEMENT* stmt, ENVIRONMENT* env) {
-        while (is_truthy(evaluate_expr(stmt->cond_expr, env))) {
+        EXPR_OP* res;
+        while (is_truthy(res = evaluate_expr(stmt->cond_expr, env))) {
                 env = down_scope(env);
 
                 evaluate_statements(stmt->body, env);
 
                 env = up_scope(env);
+                free(res);
         }
+        free(res);
 }
 
 void evaluate_assignment_statement(ASSIGNMENT_STATEMENT* stmt,
@@ -74,28 +79,37 @@ void evaluate_assignment_statement(ASSIGNMENT_STATEMENT* stmt,
                                "assignment to undeclared variable",
                                stmt->_statement_.line);
         }
+        free(res);
 }
 
 void evaluate_declaration_statement(DECLARATION_STATEMENT* stmt,
                                     ENVIRONMENT*           env) {
-        EXPR_OP* res = evaluate_expr(stmt->identifier_value, env);
+        EXPR_OP* res;
         int      data_size;
 
-        switch (res->expr_t) {
-        case EXPR_T_NUMBER:
-                data_size = sizeof(EXPR_NUM);
-                break;
-        case EXPR_T_STRING:
-                data_size = sizeof(EXPR_STR);
-                break;
-        case EXPR_T_BOOL:
-                data_size = sizeof(EXPR_BOOL);
-                break;
-        default:
-                break;
+        if (stmt->identifier_value) {
+                res = evaluate_expr(stmt->identifier_value, env);
+
+                switch (res->expr_t) {
+                case EXPR_T_NUMBER:
+                        data_size = sizeof(EXPR_NUM);
+                        break;
+                case EXPR_T_STRING:
+                        data_size = sizeof(EXPR_STR);
+                        break;
+                case EXPR_T_BOOL:
+                        data_size = sizeof(EXPR_BOOL);
+                        break;
+                default:
+                        break;
+                }
+        } else {
+                res       = NULL;
+                data_size = 0;
         }
 
         set_value(env, stmt->identifier_name, res, data_size);
+        free(res);
 }
 
 void evaluate_print_statement(PRINT_STATEMENT* stmt, ENVIRONMENT* env) {
@@ -123,6 +137,7 @@ void evaluate_print_statement(PRINT_STATEMENT* stmt, ENVIRONMENT* env) {
         default:
                 break;
         }
+        free(res);
 }
 
 // void evaluate_for_statement(FOR_STATEMENT* stmt, ENVIRONMENT* env) {}
@@ -145,7 +160,7 @@ void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env) {
                             (DECLARATION_STATEMENT*)stmt, env);
                         break;
                 case E_PRINT_STATEMENT:
-                        evaluate_print_statement((PRINT_STATEMENT *)stmt, env);
+                        evaluate_print_statement((PRINT_STATEMENT*)stmt, env);
                         break;
                 default:
                         break;

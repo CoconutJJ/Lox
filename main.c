@@ -59,4 +59,8 @@ int main(int argc, char **argv) {
         ENVIRONMENT *root_env = create_environment();
 
         evaluate_statements(code, root_env);
+
+        destroy_environment(root_env);
+        
+        exit(EXIT_SUCCESS);
 }

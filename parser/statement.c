@@ -153,9 +153,11 @@ DECLARATION_STATEMENT *parse_declaration(TOKEN **current) {
 
         if (!match_token(current, IDENTIFIER)) return NULL;
 
-        if (!match_token(current, EQUAL)) return NULL;
+        EXPR_OP *assign_value = NULL;
 
-        EXPR_OP *assign_value = parse_expr(current);
+        if (match_token(current, EQUAL)) {
+                assign_value = parse_expr(current);
+        }
 
         DECLARATION_STATEMENT *new_declaration = create_declaration_stmt();
 
@@ -246,9 +248,8 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
         IFELSE_STATEMENT *curr      = NULL;
 
         if (match_token(current, ELSE)) {
-
                 /**
-                 * TODO: If-Else-If has bad scoping issues 
+                 * TODO: If-Else-If has bad scoping issues
                  *
                  * The way we chain If-Else-If statements causes issues in the
                  * hashmap scoping method we use during evaluation. The runtime

@@ -49,11 +49,8 @@ int is_alpha(char c) {
 int is_num(char c) { return (c >= '0' && c <= '9'); }
 
 void add_token(TOKEN_T t, char *value, int line) {
-        int sz = sizeof(TOKEN);
 
-        if (value) sz += strlen(value) + 1;
-
-        TOKEN *new_token = malloc(sz);
+        TOKEN *new_token = malloc(sizeof(TOKEN));
 
         if (!new_token) {
                 perror("malloc");
@@ -63,8 +60,18 @@ void add_token(TOKEN_T t, char *value, int line) {
         new_token->t    = t;
         new_token->line = line;
         new_token->next = NULL;
+        new_token->value = NULL;
 
-        if (value) strcpy(new_token->value, value);
+        if (value) {
+                new_token->value = malloc(strlen(value) + 1);
+
+                if (!new_token->value) {
+                        perror("malloc");
+                        exit(EXIT_FAILURE);
+                }
+
+                strcpy(new_token->value, value);
+        }
 
         if (start) {
                 end->next = new_token;
@@ -286,6 +293,8 @@ void destroy_token_list(TOKEN * list) {
         while (list) {
 
                 TOKEN * next = list->next;
+
+                if (list->value) free(list->value);
 
                 free(list);
 

@@ -86,14 +86,15 @@ typedef struct _token {
         TOKEN *next;
 
         /**
+         * Token value. For STRING and NUMBER tokens only.
+         */
+        char *value;
+
+        /**
          * Line No.
          */
         int line;
 
-        /**
-         * Token value. For STRING and NUMBER tokens only.
-         */
-        char value[];
 } TOKEN;
 
 typedef enum _op_v {
