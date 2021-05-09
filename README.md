@@ -19,6 +19,7 @@ interpreted language. It is full of questionable design decisions.
                     | ""
 
 <EXPR>          =   | <EXPR-EQUAL> == <EXPR-EQUAL>
+                    | <EXPR-EQUAL> != <EXPR-EQUAL>
                     | <EXPR-EQUAL>
 
 <EXPR-EQUAL>    =   | <EXPR-CMP> > <EXPR-CMP>

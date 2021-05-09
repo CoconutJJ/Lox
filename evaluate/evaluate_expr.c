@@ -125,7 +125,6 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                                     line);
                         }
 
-
                         break;
                 case EXPR_V_MINUS:
 
@@ -181,6 +180,35 @@ EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env) {
                         } else {
                                 return (EXPR_OP *)create_expr_bool(0, line);
                         }
+                        break;
+                case EXPR_V_BANG_EQUAL:
+                        if (left->expr_t != right->expr_t) {
+                                return (EXPR_OP*) create_expr_bool(1, line);
+                        }
+                        
+                        if (left->expr_t == EXPR_T_NUMBER &&
+                            right->expr_t == EXPR_T_NUMBER) {
+                                EXPR_NUM *left_num  = (EXPR_NUM *)left;
+                                EXPR_NUM *right_num = (EXPR_NUM *)right;
+
+                                return (EXPR_OP *)create_expr_bool(
+                                    left_num->data != right_num->data, line);
+
+                        } else if (left->expr_t == EXPR_T_STRING &&
+                                   right->expr_t == EXPR_T_STRING) {
+                                EXPR_STR *left_str  = (EXPR_STR *)left;
+                                EXPR_STR *right_str = (EXPR_STR *)right;
+
+                                return (EXPR_OP *)create_expr_bool(
+                                    strcmp(left_str->data, right_str->data) !=
+                                        0,
+                                    line);
+                        } else if (left->expr_t == EXPR_T_BOOL &&
+                                   right->expr_t == EXPR_T_BOOL) {
+                                return (EXPR_OP *)create_expr_bool(
+                                    is_truthy(left) != is_truthy(right), line);
+                        }
+                        
                         break;
                 case EXPR_V_MULTIPLY:
                         if (left->expr_t == EXPR_T_NUMBER &&
