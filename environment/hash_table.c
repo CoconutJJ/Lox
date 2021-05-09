@@ -74,7 +74,7 @@ HashTable *hashtable_new() {
 void hashtable_destroy(HashTable *table) {
         for (int i = 0; i < table->size; i++) {
                 if (table->table[i].key != NULL) {
-                        free(table->table[i].item);
+                        if (table->table[i].item) free(table->table[i].item);
                         free(table->table[i].key);
                 }
         }
@@ -98,7 +98,8 @@ void hashtable_find_and_set(HashTable *t, char *key, void *item) {
                  */
                 if (strcmp(node->key, key) == 0) {
                         free(node->key);
-                        free(node->item);
+
+                        if (node->item) free(node->item);
                         break;
                 }
 
@@ -200,7 +201,8 @@ void hashtable_delete(HashTable *t, char *key) {
         }
 
         free(node->key);
-        free(node->item);
+
+        if (node->item) free(node->item);
 
         node->key     = NULL;
         node->item    = NULL;
@@ -266,26 +268,38 @@ void hashtable_set(HashTable *t, char *key, void *item, int item_sz) {
          * Copy the key and item data, external pointers may go out of scope
          * or be freed.
          */
-        char *memkey  = malloc(strlen(key) + 1);
+        char *memkey = malloc(strlen(key) + 1);
 
         if (!memkey) {
                 perror("malloc");
                 exit(EXIT_FAILURE);
         }
 
-        void *memitem = malloc(item_sz);
-
-        if (!memitem) {
-                perror("malloc");
-                exit(EXIT_FAILURE);
-        }
-
         strcpy(memkey, key);
-        memcpy(memitem, item, item_sz);
 
+        void *memitem = NULL;
+        if (item) {
+                memitem = malloc(item_sz);
+
+                if (!memitem) {
+                        perror("malloc");
+                        exit(EXIT_FAILURE);
+                }
+
+                memcpy(memitem, item, item_sz);
+        }
         hashtable_find_and_set(t, memkey, memitem);
 }
 
 int hashtable_has(HashTable *t, char *key) {
-        return hashtable_get(t, key) != NULL;
+        int index = hash(key) % t->size, currIndex = index;
+        while (1) {
+                if (t->table[index].key &&
+                    strcmp(t->table[index].key, key) == 0)
+                        return 1;
+
+                currIndex++;
+
+                if (currIndex == index) return 0;
+        }
 }
