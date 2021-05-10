@@ -88,27 +88,59 @@ void hashtable_destroy(HashTable *table) {
 void hashtable_find_and_set(HashTable *t, char *key, void *item) {
         assert(t->filled != t->size);
 
-        int index = hash(key) % t->size;
+        int index = hash(key) % t->size, currIndex = index;
 
         HashContainer *node;
+        HashContainer *free_slot = NULL;
+        while (1) {
+                node = &(t->table[currIndex]);
 
-        while ((node = &(t->table[index]))->key != NULL) {
+                /**
+                 * Always set value in first empty slot
+                 */
+                if (node->key == NULL && free_slot == NULL) {
+                        free_slot = node;
+
+                        /**
+                         * We've hit a never used before empty cell, key cannot
+                         * possibly exist.
+                         */
+                        if (!free_slot->deleted) break;
+                }
+
                 /*
                  * If key already exists, destroy old key and item
                  */
-                if (strcmp(node->key, key) == 0) {
+                if (node->key && strcmp(node->key, key) == 0) {
+                        
                         free(node->key);
-
                         if (node->item) free(node->item);
+
+                        node->item = NULL;
+                        node->key  = NULL;
+                        node->deleted = 1;
+
+                        /**
+                         * If we already found an empty slot, use that one
+                         * instead (since it occurs earlier), otherwise empty
+                         * this slot and use this one.
+                         */
+                        if (!free_slot) free_slot = node;
+
                         break;
                 }
 
-                index = (index + 1) % t->size;
+                currIndex = (currIndex + 1) % t->size;
+
+                if (currIndex == index) {
+                        assert(free_slot != NULL);
+                        break;
+                }
         }
 
-        node->key     = key;
-        node->item    = item;
-        node->deleted = 0;
+        free_slot->key     = key;
+        free_slot->item    = item;
+        free_slot->deleted = 0;
 
         t->filled++;
 }
