@@ -17,13 +17,13 @@
 
 #include "../types.h"
 
-WHILE_STATEMENT * create_while_stmt();
+struct while_statement* create_while_stmt();
 
-IFELSE_STATEMENT * create_ifelse_stmt();
+struct ifelse_statement* create_ifelse_stmt();
 
-ASSIGNMENT_STATEMENT* create_assignment_stmt();
+struct assignment_statement* create_assignment_stmt();
 
-DECLARATION_STATEMENT* create_declaration_stmt();
+struct declaration_statement* create_declaration_stmt();
 
-PRINT_STATEMENT * create_print_stmt();
+struct print_statement* create_print_stmt();
 #endif

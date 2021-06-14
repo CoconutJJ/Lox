@@ -14,15 +14,18 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "../environment/environment.h"
 #include "../error/errors.h"
 #include "../types.h"
+#include "../utils/utils.h"
 #include "./evaluate_expr.h"
 
-void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env);
+void evaluate_statements(struct statement_t* stmt, struct environment* env);
 
-void evaluate_ifelse_statement(IFELSE_STATEMENT* stmt, ENVIRONMENT* env) {
-        EXPR_OP* res = evaluate_expr(stmt->cond_expr, env);
+void evaluate_ifelse_statement(struct ifelse_statement* stmt,
+                               struct environment* env) {
+        struct expr_op* res = evaluate_expr(stmt->cond_expr, env);
         if (is_truthy(res)) {
                 free(res);
                 env = down_scope(env);
@@ -42,8 +45,9 @@ void evaluate_ifelse_statement(IFELSE_STATEMENT* stmt, ENVIRONMENT* env) {
         }
 }
 
-void evaluate_while_statement(WHILE_STATEMENT* stmt, ENVIRONMENT* env) {
-        EXPR_OP* res;
+void evaluate_while_statement(struct while_statement* stmt,
+                              struct environment* env) {
+        struct expr_op* res;
         while (is_truthy(res = evaluate_expr(stmt->cond_expr, env))) {
                 env = down_scope(env);
 
@@ -55,22 +59,23 @@ void evaluate_while_statement(WHILE_STATEMENT* stmt, ENVIRONMENT* env) {
         free(res);
 }
 
-void evaluate_assignment_statement(ASSIGNMENT_STATEMENT* stmt,
-                                   ENVIRONMENT*          env) {
-        EXPR_OP* res = evaluate_expr(stmt->identifier_value, env);
-        int      data_size;
+void evaluate_assignment_statement(struct assignment_statement* stmt,
+                                   struct environment* env) {
+        struct expr_op* res = evaluate_expr(stmt->identifier_value, env);
+        int data_size;
 
         switch (res->expr_t) {
         case EXPR_T_NUMBER:
-                data_size = sizeof(EXPR_NUM);
+                data_size = sizeof(struct expr_number);
                 break;
         case EXPR_T_STRING:
-                data_size = sizeof(EXPR_STR);
+                data_size = sizeof(struct expr_str);
                 break;
         case EXPR_T_BOOL:
-                data_size = sizeof(EXPR_BOOL);
+                data_size = sizeof(struct expr_bool);
                 break;
         default:
+                UNREACHABLE("bug: assignment value evaluated to non-leaf node");
                 break;
         }
 
@@ -82,29 +87,29 @@ void evaluate_assignment_statement(ASSIGNMENT_STATEMENT* stmt,
         free(res);
 }
 
-void evaluate_declaration_statement(DECLARATION_STATEMENT* stmt,
-                                    ENVIRONMENT*           env) {
-        EXPR_OP* res;
-        int      data_size;
+void evaluate_declaration_statement(struct declaration_statement* stmt,
+                                    struct environment* env) {
+        struct expr_op* res;
+        int data_size;
 
         if (stmt->identifier_value) {
                 res = evaluate_expr(stmt->identifier_value, env);
 
                 switch (res->expr_t) {
                 case EXPR_T_NUMBER:
-                        data_size = sizeof(EXPR_NUM);
+                        data_size = sizeof(struct expr_number);
                         break;
                 case EXPR_T_STRING:
-                        data_size = sizeof(EXPR_STR);
+                        data_size = sizeof(struct expr_str);
                         break;
                 case EXPR_T_BOOL:
-                        data_size = sizeof(EXPR_BOOL);
+                        data_size = sizeof(struct expr_bool);
                         break;
                 default:
                         break;
                 }
         } else {
-                res       = NULL;
+                res = NULL;
                 data_size = 0;
         }
 
@@ -112,25 +117,26 @@ void evaluate_declaration_statement(DECLARATION_STATEMENT* stmt,
         free(res);
 }
 
-void evaluate_print_statement(PRINT_STATEMENT* stmt, ENVIRONMENT* env) {
-        EXPR_OP* res = evaluate_expr(stmt->value, env);
+void evaluate_print_statement(struct print_statement* stmt,
+                              struct environment* env) {
+        struct expr_op* res = evaluate_expr(stmt->value, env);
 
         switch (res->expr_t) {
         case EXPR_T_NUMBER:;
-                EXPR_NUM* num = (EXPR_NUM*)res;
+                struct expr_number* num = (struct expr_number*)res;
                 printf("%lf", num->data);
                 break;
         case EXPR_T_STRING:;
-                EXPR_STR* str = (EXPR_STR*)res;
+                struct expr_str* str = (struct expr_str*)res;
                 printf("%s", str->data);
                 break;
         case EXPR_T_BOOL:;
-                EXPR_BOOL* bl = (EXPR_BOOL*)res;
+                struct expr_bool* bl = (struct expr_bool*)res;
 
                 if (bl->data) {
-                        printf("TRUE\n");
+                        printf("TRUE");
                 } else {
-                        printf("FALSE\n");
+                        printf("FALSE");
                 }
                 break;
 
@@ -140,27 +146,28 @@ void evaluate_print_statement(PRINT_STATEMENT* stmt, ENVIRONMENT* env) {
         free(res);
 }
 
-// void evaluate_for_statement(FOR_STATEMENT* stmt, ENVIRONMENT* env) {}
-
-void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env) {
+void evaluate_statements(struct statement_t* stmt, struct environment* env) {
         while (stmt) {
                 switch (stmt->type) {
                 case E_IFELSE_STATEMENT:
-                        evaluate_ifelse_statement((IFELSE_STATEMENT*)stmt, env);
+                        evaluate_ifelse_statement(
+                            (struct ifelse_statement*)stmt, env);
                         break;
                 case E_WHILE_STATEMENT:
-                        evaluate_while_statement((WHILE_STATEMENT*)stmt, env);
+                        evaluate_while_statement((struct while_statement*)stmt,
+                                                 env);
                         break;
                 case E_ASSIGNMENT_STATEMENT:
                         evaluate_assignment_statement(
-                            (ASSIGNMENT_STATEMENT*)stmt, env);
+                            (struct assignment_statement*)stmt, env);
                         break;
                 case E_DECLARATION_STATEMENT:
                         evaluate_declaration_statement(
-                            (DECLARATION_STATEMENT*)stmt, env);
+                            (struct declaration_statement*)stmt, env);
                         break;
                 case E_PRINT_STATEMENT:
-                        evaluate_print_statement((PRINT_STATEMENT*)stmt, env);
+                        evaluate_print_statement((struct print_statement*)stmt,
+                                                 env);
                         break;
                 default:
                         break;

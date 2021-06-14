@@ -19,8 +19,8 @@
 #include "../utils/utils.h"
 #include "expression.h"
 
-EXPR_BIN_OP *create_expr_bin_op(EXPR_V op, int line) {
-        EXPR_BIN_OP *new_op = malloc(sizeof(EXPR_BIN_OP));
+struct expr_bin_op *create_expr_bin_op(enum op_v op, int line) {
+        struct expr_bin_op *new_op = malloc(sizeof(struct expr_bin_op));
 
         if (!new_op) {
                 perror("malloc");
@@ -28,30 +28,30 @@ EXPR_BIN_OP *create_expr_bin_op(EXPR_V op, int line) {
         }
 
         new_op->_expr_op.expr_t = EXPR_T_BINARY;
-        new_op->op              = op;
-        new_op->left            = NULL;
-        new_op->right           = NULL;
+        new_op->op = op;
+        new_op->left = NULL;
+        new_op->right = NULL;
         new_op->_expr_op.line = line;
         return new_op;
 }
 
-EXPR_UNR_OP *create_expr_unr_op(EXPR_V op, int line) {
-        EXPR_UNR_OP *new_op = malloc(sizeof(EXPR_UNR_OP));
+struct expr_unr_op *create_expr_unr_op(enum op_v op, int line) {
+        struct expr_unr_op *new_op = malloc(sizeof(struct expr_unr_op));
 
         if (!new_op) {
                 perror("malloc");
                 exit(EXIT_FAILURE);
         }
 
-        new_op->body            = NULL;
+        new_op->body = NULL;
         new_op->_expr_op.expr_t = EXPR_T_UNARY;
-        new_op->op              = op;
+        new_op->op = op;
         new_op->_expr_op.line = line;
         return new_op;
 }
 
-EXPR_STR *create_expr_str(char *str, int line) {
-        EXPR_STR *new_str = malloc(sizeof(EXPR_STR));
+struct expr_str *create_expr_str(char *str, int line) {
+        struct expr_str *new_str = malloc(sizeof(struct expr_str));
 
         if (!new_str) {
                 perror("malloc");
@@ -59,7 +59,7 @@ EXPR_STR *create_expr_str(char *str, int line) {
         }
 
         new_str->_expr_op.expr_t = EXPR_T_STRING;
-        int sz                   = strlen(str);
+        int sz = strlen(str);
         new_str->data = malloc(sz + 1);
 
         if (!new_str->data) {
@@ -74,8 +74,8 @@ EXPR_STR *create_expr_str(char *str, int line) {
         return new_str;
 }
 
-EXPR_NUM *create_expr_num(double num, int line) {
-        EXPR_NUM *new_num = malloc(sizeof(EXPR_NUM));
+struct expr_number *create_expr_num(double num, int line) {
+        struct expr_number *new_num = malloc(sizeof(struct expr_number));
 
         if (!new_num) {
                 perror("malloc");
@@ -83,13 +83,13 @@ EXPR_NUM *create_expr_num(double num, int line) {
         }
 
         new_num->_expr_op.expr_t = EXPR_T_NUMBER;
-        new_num->data            = num;
+        new_num->data = num;
         new_num->_expr_op.line = line;
         return new_num;
 }
 
-EXPR_BOOL *create_expr_bool(int b, int line) {
-        EXPR_BOOL *new_bool = malloc(sizeof(EXPR_BOOL));
+struct expr_bool *create_expr_bool(int b, int line) {
+        struct expr_bool *new_bool = malloc(sizeof(struct expr_bool));
 
         if (!new_bool) {
                 perror("malloc");
@@ -103,8 +103,8 @@ EXPR_BOOL *create_expr_bool(int b, int line) {
         return new_bool;
 }
 
-EXPR_VAR *create_expr_var(char *name, int line) {
-        EXPR_VAR *new_var = malloc(sizeof(EXPR_VAR));
+struct expr_var *create_expr_var(char *name, int line) {
+        struct expr_var *new_var = malloc(sizeof(struct expr_var));
 
         if (!new_var) {
                 perror("malloc");
@@ -112,7 +112,7 @@ EXPR_VAR *create_expr_var(char *name, int line) {
         }
         new_var->_expr_op.expr_t = EXPR_T_VAR;
         new_var->_expr_op.line = line;
-        int sz                   = strlen(name);
+        int sz = strlen(name);
 
         new_var->var = malloc(sz + 1);
 
@@ -126,11 +126,10 @@ EXPR_VAR *create_expr_var(char *name, int line) {
         return new_var;
 }
 
-void free_expr(EXPR_OP *head) {
+void free_expr(struct expr_op *head) {
         if (!head) return;
 
         switch (head->expr_t) {
-                
         case EXPR_T_BINARY:
                 free_expr(AS_BIN_OP_PTR(head)->left);
                 free_expr(AS_BIN_OP_PTR(head)->right);
@@ -147,7 +146,7 @@ void free_expr(EXPR_OP *head) {
                 free(head);
                 break;
         case EXPR_T_STRING:
-                free(((EXPR_STR *)head)->data);
+                free(((struct expr_str *)head)->data);
                 free(head);
         default:
                 break;

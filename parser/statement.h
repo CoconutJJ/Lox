@@ -16,6 +16,6 @@
 #define STATEMENT_H
 #include "../types.h"
 
-STATEMENT *parse_statements(TOKEN **current);
+struct statement_t *parse_statements(struct token **current);
 
 #endif

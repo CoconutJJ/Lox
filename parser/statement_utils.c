@@ -18,8 +18,9 @@
 
 #include "../types.h"
 
-WHILE_STATEMENT* create_while_stmt() {
-        WHILE_STATEMENT* new_while = malloc(sizeof(WHILE_STATEMENT));
+struct while_statement* create_while_stmt() {
+        struct while_statement* new_while =
+            malloc(sizeof(struct while_statement));
 
         if (!new_while) {
                 perror("malloc");
@@ -28,14 +29,15 @@ WHILE_STATEMENT* create_while_stmt() {
 
         new_while->_statement_.next = NULL;
         new_while->_statement_.type = E_WHILE_STATEMENT;
-        new_while->body             = NULL;
-        new_while->cond_expr        = NULL;
+        new_while->body = NULL;
+        new_while->cond_expr = NULL;
 
         return new_while;
 }
 
-IFELSE_STATEMENT* create_ifelse_stmt() {
-        IFELSE_STATEMENT* new_ifelse = malloc(sizeof(IFELSE_STATEMENT));
+struct ifelse_statement* create_ifelse_stmt() {
+        struct ifelse_statement* new_ifelse =
+            malloc(sizeof(struct ifelse_statement));
 
         if (!new_ifelse) {
                 perror("malloc");
@@ -44,16 +46,16 @@ IFELSE_STATEMENT* create_ifelse_stmt() {
 
         new_ifelse->_statment_.next = NULL;
         new_ifelse->_statment_.type = E_IFELSE_STATEMENT;
-        new_ifelse->cond_expr       = NULL;
-        new_ifelse->else_clause     = NULL;
-        new_ifelse->if_clause       = NULL;
+        new_ifelse->cond_expr = NULL;
+        new_ifelse->else_clause = NULL;
+        new_ifelse->if_clause = NULL;
 
         return new_ifelse;
 }
 
-ASSIGNMENT_STATEMENT* create_assignment_stmt() {
-        ASSIGNMENT_STATEMENT* new_assignment =
-            malloc(sizeof(ASSIGNMENT_STATEMENT));
+struct assignment_statement* create_assignment_stmt() {
+        struct assignment_statement* new_assignment =
+            malloc(sizeof(struct assignment_statement));
 
         if (!new_assignment) {
                 perror("malloc");
@@ -62,15 +64,15 @@ ASSIGNMENT_STATEMENT* create_assignment_stmt() {
 
         new_assignment->_statement_.next = NULL;
         new_assignment->_statement_.type = E_ASSIGNMENT_STATEMENT;
-        new_assignment->identifier_name  = NULL;
+        new_assignment->identifier_name = NULL;
         new_assignment->identifier_value = NULL;
 
         return new_assignment;
 }
 
-DECLARATION_STATEMENT* create_declaration_stmt() {
-        DECLARATION_STATEMENT* new_declaration =
-            malloc(sizeof(DECLARATION_STATEMENT));
+struct declaration_statement* create_declaration_stmt() {
+        struct declaration_statement* new_declaration =
+            malloc(sizeof(struct declaration_statement));
 
         if (!new_declaration) {
                 perror("malloc");
@@ -79,15 +81,15 @@ DECLARATION_STATEMENT* create_declaration_stmt() {
 
         new_declaration->_statement_.next = NULL;
         new_declaration->_statement_.type = E_DECLARATION_STATEMENT;
-        new_declaration->identifier_name  = NULL;
+        new_declaration->identifier_name = NULL;
         new_declaration->identifier_value = NULL;
 
         return new_declaration;
 }
 
-PRINT_STATEMENT * create_print_stmt() {
-
-        PRINT_STATEMENT * new_print = malloc(sizeof(PRINT_STATEMENT));
+struct print_statement* create_print_stmt() {
+        struct print_statement* new_print =
+            malloc(sizeof(struct print_statement));
 
         if (!new_print) {
                 perror("malloc");
@@ -97,6 +99,6 @@ PRINT_STATEMENT * create_print_stmt() {
         new_print->_statement_.next = NULL;
         new_print->_statement_.type = E_PRINT_STATEMENT;
         new_print->value = NULL;
-        
+
         return new_print;
 }

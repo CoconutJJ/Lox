@@ -17,7 +17,7 @@
 
 #include "../types.h"
 
-void register_error(ERROR_T type, char *msg, int line) {
+void register_error(enum error_t type, char *msg, int line) {
         switch (type) {
         case PARSE_ERROR:
                 fprintf(stderr, "parse error: line %d: %s\n", line, msg);

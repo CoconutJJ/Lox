@@ -15,27 +15,26 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#define AS_BIN_OP_PTR(r) ((EXPR_BIN_OP *)(r))
-#define AS_UNR_OP_PTR(r) ((EXPR_UNR_OP *)(r))
-#define AS_EXPR_OP_PTR(r) ((EXPR_OP *)(r))
+#define AS_BIN_OP_PTR(r) ((struct expr_bin_op *)(r))
+#define AS_UNR_OP_PTR(r) ((struct expr_unr_op *)(r))
+#define AS_struct expr_op_PTR(r)((struct expr_op *)(r))
 
-typedef enum _error_t {
+#define CAST_PROP(type, var, property) (((type)var)->property)
+
+typedef enum error_t {
         PARSE_ERROR,
         SYNTAX_ERROR,
         RUNTIME_ERROR
 
-} ERROR_T;
+};
 
 typedef struct _error_entry {
-        char *  msg;
-        int     line;
-        ERROR_T type;
+        char *msg;
+        int line;
+        enum error_t type;
+};
 
-} ERROR_ENTRY;
-
-typedef struct _token TOKEN;
-
-typedef enum _token_t_ {
+enum token_t {
         AND,
         BANG,
         BANG_EQUAL,
@@ -72,18 +71,18 @@ typedef enum _token_t_ {
         VAR,
         WHILE,
 
-} TOKEN_T;
+};
 
-typedef struct _token {
+struct token {
         /**
          * Type of token
          */
-        TOKEN_T t;
+        enum token_t t;
 
         /**
          * Next Token
          */
-        TOKEN *next;
+        struct token *next;
 
         /**
          * Token value. For STRING and NUMBER tokens only.
@@ -94,10 +93,9 @@ typedef struct _token {
          * Line No.
          */
         int line;
+};
 
-} TOKEN;
-
-typedef enum _op_v {
+enum op_v {
         EXPR_V_AND,
         EXPR_V_BANG_EQUAL,
         EXPR_V_DIVIDE,
@@ -118,7 +116,7 @@ typedef enum _op_v {
         EXPR_V_STRING,
         EXPR_V_TRUE,
         EXPR_V_VAR
-} EXPR_V;
+};
 
 /**
  * OP Types
@@ -127,68 +125,65 @@ typedef enum _op_v {
  * EXPR_T_UNARY - Unary Operators
  *
  */
-typedef enum _op_t {
-
-        EXPR_T_BINARY,
-        EXPR_T_BOOL,
-        EXPR_T_NUMBER,
-        EXPR_T_STRING,
-        EXPR_T_UNARY,
-        EXPR_T_VAR
-
-} EXPR_T;
+enum op_t {
+        EXPR_T_BINARY = 0b1,
+        EXPR_T_BOOL = 0b10,
+        EXPR_T_NUMBER = 0b100,
+        EXPR_T_STRING = 0b1000,
+        EXPR_T_UNARY = 0b10000,
+        EXPR_T_VAR = 0b100000
+};
 
 /**
  * WARNING! PLEASE DO NOT INITIALIZE THIS ALONE.
  *
- * DO NOT EVER DO malloc(sizeof(EXPR_OP))!!
+ * DO NOT EVER DO malloc(sizeof(struct expr_op))!!
  *
  * IT IS NOT ONLY A USELESS STRUCT BY ITSELF BUT WILL CAUSE SEGFAULT IF
- * CASTED TO EXPR_BIN_OP OR EXPR_UNR_OP.
+ * CASTED TO struct expr_bin_op  OR struct expr_unr_op.
  */
-typedef struct _op {
-        EXPR_T expr_t;
-        int    line;
-} EXPR_OP;
+struct expr_op {
+        enum op_t expr_t;
+        int line;
+};
 
-typedef struct _expr_bin_op {
-        EXPR_OP  _expr_op;  // this property makes it child of EXPR_OP
-        EXPR_OP *left;
-        EXPR_OP *right;
-        EXPR_V   op;
+struct expr_bin_op {
+        struct expr_op
+            _expr_op;  // this property makes it child of struct expr_op
+        struct expr_op *left;
+        struct expr_op *right;
+        enum op_v op;
+};
 
-} EXPR_BIN_OP;
+struct expr_str {
+        struct expr_op _expr_op;
+        char *data;
+};
 
-typedef struct _expr_str {
-        EXPR_OP _expr_op;
-        char *  data;
-} EXPR_STR;
+struct expr_number {
+        struct expr_op _expr_op;
+        double data;
+};
 
-typedef struct _expr_number {
-        EXPR_OP _expr_op;
-        double  data;
-} EXPR_NUM;
-
-typedef struct _expr_bool {
-        EXPR_OP _expr_op;
-        int     data;
-} EXPR_BOOL;
-typedef struct _expr_var {
-        EXPR_OP _expr_op;
-        char *  var;
+struct expr_bool {
+        struct expr_op _expr_op;
+        int data;
+};
+struct expr_var {
+        struct expr_op _expr_op;
+        char *var;
         /* data */
-} EXPR_VAR;
+};
 
-typedef struct _expr_unr_op {
-        EXPR_OP  _expr_op;
-        EXPR_OP *body;
-        EXPR_V   op;
+struct expr_unr_op {
+        struct expr_op _expr_op;
+        struct expr_op *body;
+        enum op_v op;
+};
 
-} EXPR_UNR_OP;
-
-typedef struct statement_t {
+struct statement_t {
         struct statement_t *next;
-        int                 line;
+        int line;
 
         enum {
                 E_IFELSE_STATEMENT,
@@ -198,66 +193,58 @@ typedef struct statement_t {
                 E_DECLARATION_STATEMENT,
                 E_PRINT_STATEMENT
         } type;
+};
 
-} STATEMENT;
-
-typedef struct _ifelse_statement {
-        struct statement_t  _statment_;
-        EXPR_OP *           cond_expr;
+struct ifelse_statement {
+        struct statement_t _statment_;
+        struct expr_op *cond_expr;
         struct statement_t *if_clause;
         struct statement_t *else_clause;
+};
 
-} IFELSE_STATEMENT;
-
-typedef struct _while_statement {
-        struct statement_t  _statement_;
-        EXPR_OP *           cond_expr;
+struct while_statement {
+        struct statement_t _statement_;
+        struct expr_op *cond_expr;
         struct statement_t *body;
-
-} WHILE_STATEMENT;
+};
 
 // typedef struct _for_statement {
 // } FOR_STATEMENT;
 
-typedef struct _assignment_statement {
+struct assignment_statement {
         struct statement_t _statement_;
-        char *             identifier_name;
-        EXPR_OP *          identifier_value;
+        char *identifier_name;
+        struct expr_op *identifier_value;
+};
 
-} ASSIGNMENT_STATEMENT;
-
-typedef struct _declaration_statement {
+struct declaration_statement {
         struct statement_t _statement_;
-        char *             identifier_name;
-        EXPR_OP *          identifier_value;
+        char *identifier_name;
+        struct expr_op *identifier_value;
+};
 
-} DECLARATION_STATEMENT;
-
-typedef struct _print_statement {
+struct print_statement {
         struct statement_t _statement_;
-        EXPR_OP *          value;
+        struct expr_op *value;
+};
 
-} PRINT_STATEMENT;
-
-typedef struct hashcontainer {
+struct hashcontainer {
         char *key;
         void *item;
-        int   deleted;
+        int deleted;
+};
 
-} HashContainer;
+struct hashtable {
+        struct hashcontainer *table;
+        int size;
+        int filled;
+};
 
-typedef struct hashtable {
-        HashContainer *table;
-        int            size;
-        int            filled;
+struct environment {
+        struct hashtable *table;
+        struct environment *next;
+        struct environment *prev;
 
-} HashTable;
-
-typedef struct _environment {
-        HashTable *          table;
-        struct _environment *next;
-        struct _environment *prev;
-
-} ENVIRONMENT;
+};
 
 #endif

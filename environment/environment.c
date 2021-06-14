@@ -13,23 +13,24 @@
     You should have received a copy of the GNU General Public License along with
     this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "../types.h"
 #include "hash_table.h"
 
 /**
  * Creates a new environment ready for storage
  */
-ENVIRONMENT* create_environment() {
-        ENVIRONMENT* new_env = malloc(sizeof(ENVIRONMENT));
+struct environment* create_environment() {
+        struct environment* new_env = malloc(sizeof(struct environment));
 
         if (!new_env) {
                 perror("malloc");
         }
 
-        new_env->next  = NULL;
-        new_env->prev  = NULL;
+        new_env->next = NULL;
+        new_env->prev = NULL;
         new_env->table = hashtable_new();
 
         return new_env;
@@ -38,7 +39,7 @@ ENVIRONMENT* create_environment() {
 /**
  * Destroys the current environment scope
  */
-void destroy_environment_scope(ENVIRONMENT* env) {
+void destroy_environment_scope(struct environment* env) {
         hashtable_destroy(env->table);
         free(env);
 }
@@ -46,21 +47,19 @@ void destroy_environment_scope(ENVIRONMENT* env) {
 /**
  * Destroy the environment from env and up (including root)
  */
-void destroy_environment(ENVIRONMENT* env) {
+void destroy_environment(struct environment* env) {
         while (env) {
-
-                ENVIRONMENT* prev = env->prev;
+                struct environment* prev = env->prev;
                 destroy_environment_scope(env);
                 env = prev;
-        
         }
 }
 
 /**
  * Enter a scope block
  */
-ENVIRONMENT* down_scope(ENVIRONMENT* current) {
-        current->next       = create_environment();
+struct environment* down_scope(struct environment* current) {
+        current->next = create_environment();
         current->next->prev = current;
 
         return current->next;
@@ -70,8 +69,8 @@ ENVIRONMENT* down_scope(ENVIRONMENT* current) {
  * Leave the current scope block, silently ignores if current scope block is
  * also root scope. Will never destroy root environment
  */
-ENVIRONMENT* up_scope(ENVIRONMENT* current) {
-        ENVIRONMENT* prev = current->prev;
+struct environment* up_scope(struct environment* current) {
+        struct environment* prev = current->prev;
 
         /**
          * Prevent root environment from being destroyed.
@@ -88,7 +87,8 @@ ENVIRONMENT* up_scope(ENVIRONMENT* current) {
 /**
  * Set the name value keypair in the current environment.
  */
-void set_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
+void set_value(struct environment* current, char* name, void* value,
+               int value_sz) {
         hashtable_set(current->table, name, value, value_sz);
 }
 
@@ -96,7 +96,8 @@ void set_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
  * Search current environment and higher scope environments for name value
  * keypair and update with new values
  */
-int update_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
+int update_value(struct environment* current, char* name, void* value,
+                 int value_sz) {
         while (current) {
                 if (hashtable_has(current->table, name)) {
                         set_value(current, name, value, value_sz);
@@ -114,7 +115,7 @@ int update_value(ENVIRONMENT* current, char* name, void* value, int value_sz) {
  * environments. Returns the value in the lowest environment containing such
  * name.
  */
-void* get_value(ENVIRONMENT* current, char* name) {
+void* get_value(struct environment* current, char* name) {
         while (current) {
                 void* obj = hashtable_get(current->table, name);
 

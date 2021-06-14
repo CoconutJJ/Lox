@@ -17,7 +17,7 @@
 
 #include "../types.h"
 
-EXPR_OP *evaluate_expr(EXPR_OP *tree, ENVIRONMENT *env);
-int is_truthy(EXPR_OP *val);
+struct expr_op *evaluate_expr(struct expr_op *tree, struct environment *env);
+int is_truthy(struct expr_op *val);
 
 #endif

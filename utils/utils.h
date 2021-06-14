@@ -20,4 +20,11 @@
  * Returns the number of bytes copied from src.
  */
 int nstrcp(char *dest, char *src, int str_len);
+
+/**
+ * Prints out msg to stderr and exits program with non-zero exit code when
+ * called.
+ */
+void UNREACHABLE(char *msg);
+
 #endif

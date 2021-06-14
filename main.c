@@ -48,19 +48,19 @@ int main(int argc, char **argv) {
 
         fclose(source);
 
-        TOKEN *head = tokenize(buf);
+        struct token *head = tokenize(buf);
 
-        TOKEN *curr = head;
+        struct token *curr = head;
 
-        STATEMENT *code = parse_statements(&curr);
+        struct statement_t *code = parse_statements(&curr);
 
         destroy_token_list(head);
 
-        ENVIRONMENT *root_env = create_environment();
+        struct environment *root_env = create_environment();
 
         evaluate_statements(code, root_env);
 
         destroy_environment(root_env);
-        
+
         exit(EXIT_SUCCESS);
 }

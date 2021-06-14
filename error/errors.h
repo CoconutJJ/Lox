@@ -16,8 +16,8 @@
 #define ERRORS_H
 #include "../types.h"
 
-void register_error(ERROR_T type, char *msg, int line);
+void register_error(enum error_t type, char *msg, int line);
 
-void panic(TOKEN **current);
+void panic(struct token **current);
 
 #endif

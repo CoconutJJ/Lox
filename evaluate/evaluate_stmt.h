@@ -17,9 +17,8 @@
 
 #include "../types.h"
 
+int is_truthy(struct expr_op* val);
 
-int is_truthy(EXPR_OP *val);
-
-void evaluate_statements(STATEMENT* stmt, ENVIRONMENT* env);
+void evaluate_statements(struct statement_t* stmt, struct environment* env);
 
 #endif

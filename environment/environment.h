@@ -15,11 +15,13 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 #include "../types.h"
-ENVIRONMENT* create_environment();
-void         destroy_environment(ENVIRONMENT* env);
-ENVIRONMENT* down_scope(ENVIRONMENT* current);
-ENVIRONMENT* up_scope(ENVIRONMENT* current);
-void  set_value(ENVIRONMENT* current, char* name, void* value, int value_sz);
-int   update_value(ENVIRONMENT* current, char* name, void* value, int value_sz);
-void* get_value(ENVIRONMENT* current, char* name);
+struct environment* create_environment();
+void destroy_environment(struct environment* env);
+struct environment* down_scope(struct environment* current);
+struct environment* up_scope(struct environment* current);
+void set_value(struct environment* current, char* name, void* value,
+               int value_sz);
+int update_value(struct environment* current, char* name, void* value,
+                 int value_sz);
+void* get_value(struct environment* current, char* name);
 #endif

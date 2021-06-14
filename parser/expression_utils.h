@@ -15,11 +15,11 @@
 #ifndef EXPR_UTIL_H
 #define EXPR_UTIL_H
 
-EXPR_BIN_OP *create_expr_bin_op(EXPR_V op, int line);
-EXPR_UNR_OP *create_expr_unr_op(EXPR_V op, int line);
-EXPR_STR *create_expr_str(char *str, int line);
-EXPR_NUM *create_expr_num(double num, int line);
-EXPR_BOOL *create_expr_bool(int b, int line);
-EXPR_VAR *create_expr_var(char *name, int line);
-void free_expr(EXPR_OP *head);
+struct expr_bin_op *create_expr_bin_op(enum op_v op, int line);
+struct expr_unr_op *create_expr_unr_op(enum op_v op, int line);
+struct expr_str *create_expr_str(char *str, int line);
+struct expr_number *create_expr_num(double num, int line);
+struct expr_bool *create_expr_bool(int b, int line);
+struct expr_var *create_expr_var(char *name, int line);
+void free_expr(struct expr_op *head);
 #endif

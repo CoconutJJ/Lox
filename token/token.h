@@ -3,7 +3,7 @@
 
 #include "../types.h"
 
-TOKEN *tokenize(char *code);
-void destroy_token_list(TOKEN * list);
+struct token *tokenize(char *code);
+void destroy_token_list(struct token *list);
 
 #endif

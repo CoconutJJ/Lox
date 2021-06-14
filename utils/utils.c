@@ -14,7 +14,7 @@
  */
 
 #include <stdio.h>
-
+#include <stdlib.h>
 /**
  * Copy str_len bytes from src to dest and append a null terminator at the end.
  * Returns the number of bytes copied from src.
@@ -32,4 +32,13 @@ int nstrcp(char *dest, char *src, int str_len) {
         *dest = '\0';
 
         return init - str_len;
+}
+/**
+ * Prints out msg to stderr and exits program with non-zero exit code when
+ * called.
+ */
+void UNREACHABLE(char *msg) {
+        if (msg) fprintf(stderr, msg);
+
+        exit(EXIT_FAILURE);
 }

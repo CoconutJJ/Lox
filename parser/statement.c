@@ -14,21 +14,22 @@
  */
 #include <stdlib.h>
 #include <string.h>
+
 #include "../error/errors.h"
 #include "../types.h"
 #include "assert.h"
 #include "expression.h"
 #include "statement_utils.h"
 
-WHILE_STATEMENT *      parse_while(TOKEN **current);
-IFELSE_STATEMENT *     parse_conditional(TOKEN **current);
-ASSIGNMENT_STATEMENT * parse_assignment(TOKEN **current);
-DECLARATION_STATEMENT *parse_declaration(TOKEN **current);
-PRINT_STATEMENT *      parse_print(TOKEN **current);
+struct while_statement *parse_while(struct token **current);
+struct ifelse_statement *parse_conditional(struct token **current);
+struct assignment_statement *parse_assignment(struct token **current);
+struct declaration_statement *parse_declaration(struct token **current);
+struct print_statement *parse_print(struct token **current);
 
-int is_at_end(TOKEN **current) { return (*current) == NULL; }
+int is_at_end(struct token **current) { return (*current) == NULL; }
 
-int match_token(TOKEN **current, TOKEN_T t) {
+int match_token(struct token **current, enum token_t t) {
         if (is_at_end(current)) {
                 return 0;
         }
@@ -43,7 +44,7 @@ int match_token(TOKEN **current, TOKEN_T t) {
 /**
  * Peek at the next token in the list.
  */
-TOKEN_T peek_token(TOKEN **current) {
+enum token_t peek_token(struct token **current) {
         if (is_at_end(current)) return -1;
 
         if ((*current)->next) return (*current)->next->t;
@@ -51,9 +52,9 @@ TOKEN_T peek_token(TOKEN **current) {
         return -1;
 }
 
-STATEMENT *parse_stmt(TOKEN **current) {
-        STATEMENT * head = NULL;
-        STATEMENT **curr = &head;
+struct statement_t *parse_stmt(struct token **current) {
+        struct statement_t *head = NULL;
+        struct statement_t **curr = &head;
 
         while (!is_at_end(current)) {
                 /**
@@ -61,21 +62,24 @@ STATEMENT *parse_stmt(TOKEN **current) {
                  */
                 switch ((*current)->t) {
                 case IF:
-                        *curr = (STATEMENT *)parse_conditional(current);
+                        *curr =
+                            (struct statement_t *)parse_conditional(current);
                         break;
                 case WHILE:
-                        *curr = (STATEMENT *)parse_while(current);
+                        *curr = (struct statement_t *)parse_while(current);
                         break;
                 case IDENTIFIER:
                         if (peek_token(current) == EQUAL) {
-                                *curr = (STATEMENT *)parse_assignment(current);
+                                *curr = (struct statement_t *)parse_assignment(
+                                    current);
                         }
                         break;
                 case VAR:
-                        *curr = (STATEMENT *)parse_declaration(current);
+                        *curr =
+                            (struct statement_t *)parse_declaration(current);
                         break;
                 case PRINT:
-                        *curr = (STATEMENT *)parse_print(current);
+                        *curr = (struct statement_t *)parse_print(current);
                         break;
                 default:
                         break;
@@ -93,8 +97,8 @@ STATEMENT *parse_stmt(TOKEN **current) {
 /**
  * Entry function to parse list of statements
  */
-STATEMENT *parse_statements(TOKEN **current) {
-        STATEMENT *code = parse_stmt(current);
+struct statement_t *parse_statements(struct token **current) {
+        struct statement_t *code = parse_stmt(current);
 
         if (!is_at_end(current)) {
                 register_error(SYNTAX_ERROR, "unknown symbol",
@@ -107,16 +111,16 @@ STATEMENT *parse_statements(TOKEN **current) {
 /**
  * Parse a print() statement
  */
-PRINT_STATEMENT *parse_print(TOKEN **current) {
+struct print_statement *parse_print(struct token **current) {
         if (!match_token(current, PRINT)) return NULL;
 
         if (!match_token(current, LEFT_PAREN)) return NULL;
 
-        EXPR_OP *print_value = parse_expr(current);
+        struct expr_op *print_value = parse_expr(current);
 
         if (!match_token(current, RIGHT_PAREN)) return NULL;
 
-        PRINT_STATEMENT *new_print = create_print_stmt();
+        struct print_statement *new_print = create_print_stmt();
 
         new_print->value = print_value;
 
@@ -126,18 +130,18 @@ PRINT_STATEMENT *parse_print(TOKEN **current) {
 /**
  * Parse an assignment statement
  */
-ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
-        TOKEN *ident = *current;
+struct assignment_statement *parse_assignment(struct token **current) {
+        struct token *ident = *current;
 
         if (!match_token(current, IDENTIFIER)) return NULL;
 
         if (!match_token(current, EQUAL)) return NULL;
 
-        EXPR_OP *assign_value = parse_expr(current);
+        struct expr_op *assign_value = parse_expr(current);
 
-        ASSIGNMENT_STATEMENT *new_assignment = create_assignment_stmt();
+        struct assignment_statement *new_assignment = create_assignment_stmt();
 
-        new_assignment->identifier_name  = strdup(ident->value);
+        new_assignment->identifier_name = strdup(ident->value);
         new_assignment->identifier_value = assign_value;
         new_assignment->_statement_.line = ident->line;
         return new_assignment;
@@ -146,22 +150,23 @@ ASSIGNMENT_STATEMENT *parse_assignment(TOKEN **current) {
 /**
  * Parse a declaration statement
  */
-DECLARATION_STATEMENT *parse_declaration(TOKEN **current) {
+struct declaration_statement *parse_declaration(struct token **current) {
         if (!match_token(current, VAR)) return NULL;
 
-        TOKEN *ident = *current;
+        struct token *ident = *current;
 
         if (!match_token(current, IDENTIFIER)) return NULL;
 
-        EXPR_OP *assign_value = NULL;
+        struct expr_op *assign_value = NULL;
 
         if (match_token(current, EQUAL)) {
                 assign_value = parse_expr(current);
         }
 
-        DECLARATION_STATEMENT *new_declaration = create_declaration_stmt();
+        struct declaration_statement *new_declaration =
+            create_declaration_stmt();
 
-        new_declaration->identifier_name  = strdup(ident->value);
+        new_declaration->identifier_name = strdup(ident->value);
         new_declaration->identifier_value = assign_value;
         new_declaration->_statement_.line = ident->line;
         return new_declaration;
@@ -170,8 +175,8 @@ DECLARATION_STATEMENT *parse_declaration(TOKEN **current) {
 /**
  * Parse a while statement
  */
-WHILE_STATEMENT *parse_while(TOKEN **current) {
-        WHILE_STATEMENT *new_while = create_while_stmt();
+struct while_statement *parse_while(struct token **current) {
+        struct while_statement *new_while = create_while_stmt();
 
         new_while->_statement_.line = (*current)->line;
 
@@ -183,7 +188,7 @@ WHILE_STATEMENT *parse_while(TOKEN **current) {
                 return NULL;
         }
 
-        EXPR_OP *cond = parse_expr(current);
+        struct expr_op *cond = parse_expr(current);
 
         if (!match_token(current, RIGHT_PAREN)) {
                 register_error(SYNTAX_ERROR, "missing ) after WHILE statement",
@@ -197,9 +202,9 @@ WHILE_STATEMENT *parse_while(TOKEN **current) {
                 return NULL;
         }
 
-        STATEMENT *body = parse_stmt(current);
+        struct statement_t *body = parse_stmt(current);
 
-        new_while->body      = body;
+        new_while->body = body;
         new_while->cond_expr = cond;
 
         if (!match_token(current, RIGHT_BRACE)) {
@@ -211,10 +216,8 @@ WHILE_STATEMENT *parse_while(TOKEN **current) {
         return new_while;
 }
 
-// FOR_STATEMENT *parse_for(TOKEN **current) {}
-
-IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
-        IFELSE_STATEMENT *new_ifelse = create_ifelse_stmt();
+struct ifelse_statement *parse_conditional(struct token **current) {
+        struct ifelse_statement *new_ifelse = create_ifelse_stmt();
 
         new_ifelse->_statment_.line = (*current)->line;
 
@@ -225,7 +228,7 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                                (*current)->line);
         }
 
-        EXPR_OP *cond = parse_expr(current);
+        struct expr_op *cond = parse_expr(current);
 
         if (!match_token(current, RIGHT_PAREN)) {
                 register_error(SYNTAX_ERROR, "missing ) after IF statement",
@@ -237,15 +240,15 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                                (*current)->line);
         }
 
-        STATEMENT *if_body = parse_stmt(current);
+        struct statement_t *if_body = parse_stmt(current);
 
         if (!match_token(current, RIGHT_BRACE)) {
                 register_error(SYNTAX_ERROR, "missing } after IF clause",
                                (*current)->line);
         }
 
-        STATEMENT *       else_body = NULL;
-        IFELSE_STATEMENT *curr      = NULL;
+        struct statement_t *else_body = NULL;
+        struct ifelse_statement *curr = NULL;
 
         if (match_token(current, ELSE)) {
                 /**
@@ -269,7 +272,7 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                                     (*current)->line);
                         }
 
-                        EXPR_OP *elif_cond = parse_expr(current);
+                        struct expr_op *elif_cond = parse_expr(current);
 
                         if (!match_token(current, RIGHT_PAREN)) {
                                 register_error(
@@ -284,7 +287,7 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                                                (*current)->line);
                         }
 
-                        IFELSE_STATEMENT *elif = create_ifelse_stmt();
+                        struct ifelse_statement *elif = create_ifelse_stmt();
 
                         elif->cond_expr = elif_cond;
                         elif->if_clause = parse_stmt(current);
@@ -339,8 +342,8 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
                 }
 
                 /**
-                 * We need to check here if the else clause is standalone
-                 * or a footer to a series of else-if clauses.
+                 * We need to check here if the else clause is standalone or a
+                 * footer to a series of else-if clauses.
                  */
                 if (curr) {
                         curr->else_clause = parse_stmt(current);
@@ -358,8 +361,8 @@ IFELSE_STATEMENT *parse_conditional(TOKEN **current) {
         }
 
 create_ifelse_body:
-        new_ifelse->cond_expr   = cond;
-        new_ifelse->if_clause   = if_body;
+        new_ifelse->cond_expr = cond;
+        new_ifelse->if_clause = if_body;
         new_ifelse->else_clause = else_body;
 
         return new_ifelse;

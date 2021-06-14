@@ -21,8 +21,8 @@
 #include "../types.h"
 #include "../utils/utils.h"
 
-TOKEN *start = NULL;
-TOKEN *end   = NULL;
+struct token *start = NULL;
+struct token *end = NULL;
 
 int token_at_end(char *code, int *c) { return code[*c] == '\0'; }
 
@@ -48,16 +48,15 @@ int is_alpha(char c) {
 
 int is_num(char c) { return (c >= '0' && c <= '9'); }
 
-void add_token(TOKEN_T t, char *value, int line) {
-
-        TOKEN *new_token = malloc(sizeof(TOKEN));
+void add_token(enum token_t t, char *value, int line) {
+        struct token *new_token = malloc(sizeof(struct token));
 
         if (!new_token) {
                 perror("malloc");
                 exit(EXIT_FAILURE);
         }
 
-        new_token->t    = t;
+        new_token->t = t;
         new_token->line = line;
         new_token->next = NULL;
         new_token->value = NULL;
@@ -75,16 +74,16 @@ void add_token(TOKEN_T t, char *value, int line) {
 
         if (start) {
                 end->next = new_token;
-                end       = end->next;
+                end = end->next;
         } else {
                 start = new_token;
-                end   = start;
+                end = start;
         }
 
         return;
 }
 
-TOKEN_T match_identifier(char *ident) {
+enum token_t match_identifier(char *ident) {
         if (strcmp(ident, "if") == 0) {
                 return IF;
         }
@@ -145,7 +144,7 @@ void identifier(char *code, int *c, int line) {
 
         nstrcp(ident, start, end - start + 1);
 
-        TOKEN_T id = match_identifier(ident);
+        enum token_t id = match_identifier(ident);
 
         add_token(id != -1 ? id : IDENTIFIER, id != -1 ? NULL : ident, line);
 }
@@ -260,8 +259,8 @@ void string(char *code, int *c, int line) {
 }
 
 void number(char *code, int *c, int line) {
-        int   hasDecimal = 0;
-        char *start      = &code[*c];
+        int hasDecimal = 0;
+        char *start = &code[*c];
 
         while (1) {
                 if (is_num(code[*c])) {
@@ -288,25 +287,20 @@ void number(char *code, int *c, int line) {
         add_token(NUMBER, num, line);
 }
 
-void destroy_token_list(TOKEN * list) {
-
+void destroy_token_list(struct token *list) {
         while (list) {
-
-                TOKEN * next = list->next;
+                struct token *next = list->next;
 
                 if (list->value) free(list->value);
 
                 free(list);
 
                 list = next;
-
         }
-
 }
 
-
-TOKEN *tokenize(char *code) {
-        int c    = 0;
+struct token *tokenize(char *code) {
+        int c = 0;
         int line = 1;
         while (!token_at_end(code, &c)) {
                 switch (code[c]) {
@@ -407,7 +401,7 @@ TOKEN *tokenize(char *code) {
                 c++;
         }
 
-        TOKEN * head = start;
+        struct token *head = start;
 
         start = NULL;
         end = NULL;

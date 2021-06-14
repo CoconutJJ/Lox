@@ -21,9 +21,9 @@
 #include "../utils/utils.h"
 #include "expression_utils.h"
 
-EXPR_OP *parse_equality(TOKEN **current);
+struct expr_op *parse_equality(struct token **current);
 
-EXPR_V _to_op(TOKEN *token) {
+enum op_v _to_op(struct token *token) {
         switch (token->t) {
         case AND:
                 return EXPR_V_AND;
@@ -70,15 +70,15 @@ EXPR_V _to_op(TOKEN *token) {
         }
 }
 
-int op_at_end(TOKEN **current) { return (*current) == NULL; }
+int op_at_end(struct token **current) { return (*current) == NULL; }
 
-EXPR_V peek_op(TOKEN **current) {
+enum op_v peek_op(struct token **current) {
         if (op_at_end(current)) return -1;
 
         return _to_op(*current);
 }
 
-int match_op(TOKEN **current, EXPR_V op) {
+int match_op(struct token **current, enum op_v op) {
         if (peek_op(current) == op) {
                 *current = (*current)->next;
                 return 1;
@@ -90,19 +90,19 @@ int match_op(TOKEN **current, EXPR_V op) {
  *  Parses a left-associative binary operator, where *left is run on the l.h.s
  *  of the operator, and *right is run on the r.h.s of the operator
  */
-EXPR_BIN_OP *parse_left_assoc_bin_op(
-    TOKEN **current,  // double pointer to current position in list
-    EXPR_OP *(*left)(
-        TOKEN **),  // function to parse left side of binary operator
-    EXPR_OP *(*right)(
-        TOKEN **),  // function to parse right side of binary operator
-    EXPR_V ops[],   // list of operators
-    int    ops_sz   // length of ops[] list
+struct expr_bin_op *parse_left_assoc_bin_op(
+    struct token **current,  // double pointer to current position in list
+    struct expr_op *(*left)(
+        struct token **),  // function to parse left side of binary operator
+    struct expr_op *(*right)(
+        struct token **),  // function to parse right side of binary operator
+    enum op_v ops[],       // list of operators
+    int ops_sz             // length of ops[] list
 ) {
-        EXPR_OP *l = left(current);
+        struct expr_op *l = left(current);
 
         while (1) {
-                EXPR_V op = -1;
+                enum op_v op = -1;
 
                 for (int i = 0; i < ops_sz; i++) {
                         if (!match_op(current, ops[i])) continue;
@@ -111,28 +111,29 @@ EXPR_BIN_OP *parse_left_assoc_bin_op(
                         break;
                 }
 
-                if (op == (EXPR_V)-1) break;
+                if (op == (enum op_v) - 1) break;
 
                 int line = (*current)->line;
 
-                EXPR_OP *r = right(current);
+                struct expr_op *r = right(current);
 
-                EXPR_BIN_OP *root = create_expr_bin_op(op, line);
+                struct expr_bin_op *root = create_expr_bin_op(op, line);
 
-                root->left  = l;
+                root->left = l;
                 root->right = r;
 
-                l = (EXPR_OP *)root;
+                l = (struct expr_op *)root;
         }
 
-        return (EXPR_BIN_OP *)l;
+        return (struct expr_bin_op *)l;
 }
 
-EXPR_OP *parse_primary(TOKEN **current) {
-        TOKEN *old  = *current;
-        int    line = old->line;
+struct expr_op *parse_primary(struct token **current) {
+        struct token *old = *current;
+        int line = old->line;
         if (match_op(current, EXPR_V_LEFT_PAREN)) {
-                EXPR_OP *primary = (EXPR_OP *)parse_equality(current);
+                struct expr_op *primary =
+                    (struct expr_op *)parse_equality(current);
 
                 if (!match_op(current, EXPR_V_RIGHT_PAREN)) {
                         register_error(PARSE_ERROR,
@@ -143,32 +144,36 @@ EXPR_OP *parse_primary(TOKEN **current) {
         }
 
         if (match_op(current, EXPR_V_STRING)) {
-                EXPR_OP *str = (EXPR_OP *)create_expr_str(old->value, line);
+                struct expr_op *str =
+                    (struct expr_op *)create_expr_str(old->value, line);
 
                 return str;
         }
 
         if (match_op(current, EXPR_V_NUMBER)) {
-                EXPR_OP *num =
-                    (EXPR_OP *)create_expr_num(strtod(old->value, NULL), line);
+                struct expr_op *num = (struct expr_op *)create_expr_num(
+                    strtod(old->value, NULL), line);
 
                 return num;
         }
 
         if (match_op(current, EXPR_V_TRUE)) {
-                EXPR_OP *bl = (EXPR_OP *)create_expr_bool(1, line);
+                struct expr_op *bl =
+                    (struct expr_op *)create_expr_bool(1, line);
 
                 return bl;
         }
 
         if (match_op(current, EXPR_V_FALSE)) {
-                EXPR_OP *bl = (EXPR_OP *)create_expr_bool(0, line);
+                struct expr_op *bl =
+                    (struct expr_op *)create_expr_bool(0, line);
 
                 return bl;
         }
 
         if (match_op(current, EXPR_V_VAR)) {
-                EXPR_OP *var = (EXPR_OP *)create_expr_var(old->value, line);
+                struct expr_op *var =
+                    (struct expr_op *)create_expr_var(old->value, line);
 
                 return var;
         }
@@ -178,61 +183,64 @@ EXPR_OP *parse_primary(TOKEN **current) {
         return NULL;
 }
 
-EXPR_OP *parse_unary(TOKEN **current) {
-        TOKEN *curr_op = *current;
-        int    line    = curr_op->line;
+struct expr_op *parse_unary(struct token **current) {
+        struct token *curr_op = *current;
+        int line = curr_op->line;
         if (match_op(current, EXPR_V_NOT) || match_op(current, EXPR_V_MINUS)) {
-                EXPR_UNR_OP *op = create_expr_unr_op(peek_op(&curr_op), line);
+                struct expr_unr_op *op =
+                    create_expr_unr_op(peek_op(&curr_op), line);
 
-                op->body = (EXPR_OP *)parse_unary(current);
+                op->body = (struct expr_op *)parse_unary(current);
 
-                return (EXPR_OP *)op;
+                return (struct expr_op *)op;
         } else {
                 return parse_primary(current);
         }
 }
 
-EXPR_OP *parse_products(TOKEN **current) {
-        EXPR_V ops[] = {EXPR_V_MULTIPLY, EXPR_V_DIVIDE};
+struct expr_op *parse_products(struct token **current) {
+        enum op_v ops[] = {EXPR_V_MULTIPLY, EXPR_V_DIVIDE};
 
-        return (EXPR_OP *)parse_left_assoc_bin_op(current, parse_unary,
-                                                  parse_unary, ops, 2);
+        return (struct expr_op *)parse_left_assoc_bin_op(current, parse_unary,
+                                                         parse_unary, ops, 2);
 }
 
-EXPR_OP *parse_sums(TOKEN **current) {
-        EXPR_V ops[] = {EXPR_V_PLUS, EXPR_V_MINUS};
+struct expr_op *parse_sums(struct token **current) {
+        enum op_v ops[] = {EXPR_V_PLUS, EXPR_V_MINUS};
 
-        return (EXPR_OP *)parse_left_assoc_bin_op(current, parse_products,
-                                                  parse_products, ops, 2);
+        return (struct expr_op *)parse_left_assoc_bin_op(
+            current, parse_products, parse_products, ops, 2);
 }
 
-EXPR_OP *parse_and(TOKEN **current) {
-        EXPR_V ops[] = {EXPR_V_AND};
+struct expr_op *parse_and(struct token **current) {
+        enum op_v ops[] = {EXPR_V_AND};
 
-        return (EXPR_OP *)parse_left_assoc_bin_op(current, parse_sums,
-                                                  parse_sums, ops, 1);
+        return (struct expr_op *)parse_left_assoc_bin_op(current, parse_sums,
+                                                         parse_sums, ops, 1);
 }
 
-EXPR_OP *parse_or(TOKEN **current) {
-        EXPR_V ops[] = {EXPR_V_OR};
+struct expr_op *parse_or(struct token **current) {
+        enum op_v ops[] = {EXPR_V_OR};
 
-        return (EXPR_OP *)parse_left_assoc_bin_op(current, parse_and, parse_and,
-                                                  ops, 1);
+        return (struct expr_op *)parse_left_assoc_bin_op(current, parse_and,
+                                                         parse_and, ops, 1);
 }
 
-EXPR_OP *parse_comparison(TOKEN **current) {
-        EXPR_V ops[] = {EXPR_V_GREATER, EXPR_V_LESS, EXPR_V_GREATER_EQ,
-                        EXPR_V_LESS_EQ};
+struct expr_op *parse_comparison(struct token **current) {
+        enum op_v ops[] = {EXPR_V_GREATER, EXPR_V_LESS, EXPR_V_GREATER_EQ,
+                           EXPR_V_LESS_EQ};
 
-        return (EXPR_OP *)parse_left_assoc_bin_op(current, parse_or, parse_or,
-                                                  ops, 4);
+        return (struct expr_op *)parse_left_assoc_bin_op(current, parse_or,
+                                                         parse_or, ops, 4);
 }
 
-EXPR_OP *parse_equality(TOKEN **current) {
-        EXPR_V ops[] = {EXPR_V_EQUAL_EQUAL, EXPR_V_BANG_EQUAL};
+struct expr_op *parse_equality(struct token **current) {
+        enum op_v ops[] = {EXPR_V_EQUAL_EQUAL, EXPR_V_BANG_EQUAL};
 
-        return (EXPR_OP *)parse_left_assoc_bin_op(current, parse_comparison,
-                                                  parse_comparison, ops, 2);
+        return (struct expr_op *)parse_left_assoc_bin_op(
+            current, parse_comparison, parse_comparison, ops, 2);
 }
 
-EXPR_OP *parse_expr(TOKEN **current) { return parse_equality(current); }
+struct expr_op *parse_expr(struct token **current) {
+        return parse_equality(current);
+}
